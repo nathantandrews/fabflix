@@ -1,13 +1,13 @@
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -25,7 +25,7 @@ public class SingleStarServlet extends HttpServlet {
 
     public void init(ServletConfig config) {
         try {
-            dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedbexample");
+            dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedb");
         } catch (NamingException e) {
             e.printStackTrace();
         }
@@ -36,7 +36,7 @@ public class SingleStarServlet extends HttpServlet {
      * response)
      */
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
+        long startTime = System.currentTimeMillis();
         response.setContentType("application/json"); // Response mime type
 
         // Retrieve parameter id from url request.
@@ -114,7 +114,8 @@ public class SingleStarServlet extends HttpServlet {
         } finally {
             out.close();
         }
-
+        long endTime = System.currentTimeMillis();
+        System.out.println("single-star request took:" + (endTime - startTime));
         // Always remember to close db connection after usage. Here it's done by try-with-resources
 
     }

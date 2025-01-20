@@ -1,16 +1,14 @@
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
+import com.google.gson.stream.JsonWriter;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.sql.DataSource;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,8 +23,9 @@ public class SingleMovieServlet extends HttpServlet {
 
     public void init(ServletConfig config) {
         try {
-            dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedbexample");
+            dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedb");
         } catch (NamingException e) {
+            //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
     }
@@ -36,7 +35,7 @@ public class SingleMovieServlet extends HttpServlet {
      * response)
      */
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
+        long startTime = System.currentTimeMillis();
         response.setContentType("application/json"); // Response mime type
 
         // Retrieve parameter id from url request.
@@ -46,7 +45,7 @@ public class SingleMovieServlet extends HttpServlet {
         request.getServletContext().log("getting id: " + id);
 
         // Output stream to STDOUT
-        PrintWriter out = response.getWriter();
+        JsonWriter out = new JsonWriter(response.getWriter());
 
         // Get a connection from dataSource and let resource manager close the connection after usage.
         try (Connection conn = dataSource.getConnection()) {
@@ -76,44 +75,35 @@ public class SingleMovieServlet extends HttpServlet {
             // Perform the query
             ResultSet rs = statement.executeQuery();
 
-            JsonArray jsonArray = new JsonArray();
 
-            // Iterate through each row of rs
+            out.beginArray();
             while (rs.next()) {
-                String movieId = rs.getString("movieId");
-                String movieTitle = rs.getString("title");
-                String movieYear = rs.getString("year");
-                String movieDirector = rs.getString("director");
-                String movieGenre = rs.getString("genres");
-                String movieStars = rs.getString("stars");
-                String movieRating = rs.getString("rating");
+
 
                 // Create a JsonObject based on the data we retrieve from rs
-
-                JsonObject jsonObject = new JsonObject();
-                jsonObject.addProperty("movie_id", movieId);
-                jsonObject.addProperty("movie_title", movieTitle);
-                jsonObject.addProperty("movie_year", movieYear);
-                jsonObject.addProperty("movie_director", movieDirector);
-                jsonObject.addProperty("movie_genre", movieGenre);
-                jsonObject.addProperty("movie_stars", movieStars);
-                jsonObject.addProperty("movie_rating", movieRating);
-
-                jsonArray.add(jsonObject);
+                out.beginObject();
+                out.name("movie_id").value(rs.getString("movieId"));
+                out.name("movie_title").value(rs.getString("title"));
+                out.name("movie_year").value(rs.getString("year"));
+                out.name("movie_director").value(rs.getString("director"));
+                out.name("movie_genre").value(rs.getString("genres"));
+                out.name("movie_stars").value(rs.getString("stars"));
+                out.name("movie_rating").value(rs.getString("rating"));
+                out.endObject();
             }
+            out.endArray();
+
             rs.close();
             statement.close();
 
-            // Write JSON string to output
-            out.write(jsonArray.toString());
             // Set response status to 200 (OK)
             response.setStatus(200);
 
         } catch (Exception e) {
             // Write error message JSON object to output
-            JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("errorMessage", e.getMessage());
-            out.write(jsonObject.toString());
+            out.beginObject();
+            out.name("errorMessage").value(e.getMessage());
+            out.endObject();
 
             // Log error to localhost log
             request.getServletContext().log("Error:", e);
@@ -122,6 +112,8 @@ public class SingleMovieServlet extends HttpServlet {
         } finally {
             out.close();
         }
+        long endTime = System.currentTimeMillis();
+        System.out.println("single-movie request took:" + (endTime - startTime));
 
         // Always remember to close db connection after usage. Here it's done by try-with-resources
 

@@ -1,5 +1,16 @@
 /**
- * Handles the data returned by the API, reads the JSON object, and populates the data into HTML elements.
+ * This example is following frontend and backend separation.
+ *
+ * Before this .js is loaded, the html skeleton is created.
+ *
+ * This .js performs two steps:
+ *      1. Use jQuery to talk to backend API to get the json data.
+ *      2. Populate the data to correct html elements.
+ */
+
+
+/**
+ * Handles the data returned by the API, read the jsonObject and populate data into html elements
  * @param resultData jsonObject
  */
 function handleResult(resultData) {
@@ -10,21 +21,33 @@ function handleResult(resultData) {
     resultData.forEach((movie, index) => {
 
         //Early exit if more than 20 movies
-        if (index >= 20) return;
 
-        let genres = movie["movie_genre"].split(',').slice(0, 3).join(', ');
+        // .split(',').slice(0, 3).join(', ')
 
         //JS magic with .map (foreach loop essentially)
-        let stars = movie["movie_stars"]
-            .split(',')
-            .slice(0, 3)
-            .map(s => {
-                const re = new RegExp("\\((.*?)\\)");
-                let id = re.exec(s)?.[1];
-                return `<a href="single-star.html?id=${id}">${s.split('(')[0]}</a>`;
-            })
-            .join(', ');
+        // let stars = movie["movie_stars"]
+        //     .split(',')
+        //     .slice(0, 3)
+        //     .map(s => {
+        //         const re = new RegExp("\\((.*?)\\)");
+        //         let id = re.exec(s)?.[1];
+        //         return `<a href="single-star.html?id=${id}">${s.split('(')[0]}</a>`;
+        //     })
+        //     .join(', ');
 
+        let stars = "";
+        const movie_stars_ids = movie["movie_stars_ids"].split(", ");
+        const movie_stars_names = movie["movie_stars_names"].split(", ");
+        for (let i = 0; i < movie_stars_ids.length && i < 3; ++i)
+        {
+            if (i > 0)
+            {
+                stars += ', &nbsp;';
+            }
+            stars += '<a href="single-star.html?id=' + movie_stars_ids[i] + '">'
+                + movie_stars_names[i] +     // display star_name for the link text
+                '</a>'
+        }
         let color = getColorForRating(parseFloat(movie["movie_rating"]));
 
         // This will create one of the "cards" for each movie, the cards is the white box that contains the title href, director etc
@@ -35,7 +58,7 @@ function handleResult(resultData) {
                 </h3>
                 <div><strong>Year:</strong> ${movie["movie_year"]}</div>
                 <div><strong>Director:</strong> ${movie["movie_director"]}</div>
-                <div><strong>Genres:</strong> ${genres}</div>
+                <div><strong>Genres:</strong> ${movie["movie_genres"]}</div>
                 <div><strong>Stars:</strong> ${stars}</div>
                 <div style="color: white; background-color: ${color}; padding: 5px 10px; border-radius: 5px;">
                     <strong>Rating:</strong> ${movie["movie_rating"]}
@@ -46,13 +69,16 @@ function handleResult(resultData) {
         movieListElement.append(movieCard);
     });
 }
-
+function handleError(resultData) {
+    console.log(resultData)
+}
 // Fetch movie data from the API
 jQuery.ajax({
     dataType: "json",
     method: "GET",
     url: "api/movie-list",
     success: handleResult,
+    error: handleError
 });
 
 /**
