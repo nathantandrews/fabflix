@@ -18,7 +18,7 @@ function handleResult(resultData) {
 
     let movieListElement = jQuery("#movie_list");
 
-    resultData.forEach((movie, index) => {
+    resultData.forEach((movie) => {
 
         //Early exit if more than 20 movies
 
