@@ -27,6 +27,7 @@ public class SingleStarServlet extends HttpServlet {
         try {
             dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedb");
         } catch (NamingException e) {
+            //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
     }
