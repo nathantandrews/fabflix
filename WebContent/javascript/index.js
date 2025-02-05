@@ -44,7 +44,7 @@ function handleResult(resultData) {
             {
                 stars += ', &nbsp;';
             }
-            stars += '<a href="single-star.html?id=' + movie_stars_ids[i] + '">'
+            stars += '<a href=' + movie_stars_ids[i] + '"single-star.html?id=">'
                 + movie_stars_names[i] +     // display star_name for the link text
                 '</a>'
         }
@@ -54,7 +54,7 @@ function handleResult(resultData) {
         let movieCard = `
             <div class="movie-card">
                 <h3 class="movie-title">
-                    <a href="single-movie.html?id=${movie['movie_id']}">${movie['movie_title']}</a>
+                    <a href="html/single-movie.html?id=${movie['movie_id']}">${movie['movie_title']}</a>
                 </h3>
                 <div><strong>Year:</strong> ${movie["movie_year"]}</div>
                 <div><strong>Director:</strong> ${movie["movie_director"]}</div>
@@ -76,7 +76,7 @@ function handleError(resultData) {
 jQuery.ajax({
     dataType: "json",
     method: "GET",
-    url: "api/movie-list",
+    url: "/Fabflix_war/api/movie-list",
     success: handleResult,
     error: handleError
 });

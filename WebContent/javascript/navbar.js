@@ -1,0 +1,17 @@
+function createNavbar()
+{
+    document.addEventListener('DOMContentLoaded', () => {
+        const navbar = document.createElement('div');
+        navbar.id = "nav-placeholder";
+        navbar.classList.add("nav-placeholder");
+        document.body.insertAdjacentElement('afterbegin', navbar);
+        fetch("navbar.html")
+            .then(response => response.text())
+            .then(data => {
+                navbar.innerHTML = data;
+            })
+            .catch(error => console.error("Error loading navbar:", error));
+    });
+}
+
+export {createNavbar}

@@ -10,6 +10,8 @@
  */
 
 
+import {createNavbar} from "./navbar.js";
+
 /**
  * Retrieve parameter from request URL, matching by parameter name
  * @param target String
@@ -75,7 +77,7 @@ function handleResult(resultData) {
         const re = new RegExp("\\((.*?)\\)");
         let id = re.exec(s)[1];
         return `<a href="single-star.html?id=${id}">${s.split('(')[0]}</a>`;
-    }).join('<br>'); // Basically a "newline" character. Makes it so that theres a space between each line
+    }).join('<br>'); // Basically a "newline" character. Makes it so that there's a space between each line
     let starsSection = `
         <div class="section">
             <div class="section-title">Stars</div>
@@ -105,14 +107,15 @@ function getColorForRating(rating) {
     return `rgb(${red}, ${green}, 0)`;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    const backHomeButton = `
-        <div class="back-home">
-            <button onclick="window.location.href='index.html'" class="btn btn-primary">Home</button>
-        </div>
-    `;
-    document.body.insertAdjacentHTML('afterbegin', backHomeButton);
-});
+createNavbar();
+// document.addEventListener('DOMContentLoaded', () => {
+//     const backHomeButton = `
+//         <div class="back-home">
+//             <button onclick="window.location.href='index.html'" class="btn btn-primary">Home</button>
+//         </div>
+//     `;
+//     document.body.insertAdjacentHTML('afterbegin', backHomeButton);
+// });
 /**
  * Once this .js is loaded, following scripts will be executed by the browser\
  */
@@ -124,7 +127,7 @@ let movieId = getParameterByName('id');
 jQuery.ajax({
     dataType: "json",  // Setting return data type
     method: "GET",// Setting request method
-    url: "api/single-movie?id=" + movieId, // Setting request url, which is mapped by StarsServlet in Stars.java
+    url: "/Fabflix_war/api/single-movie?id=" + movieId, // Setting request url, which is mapped by StarsServlet in Stars.java
     success: (resultData) => handleResult(resultData) // Setting callback function to handle data returned successfully by the SingleStarServlet
 });
 

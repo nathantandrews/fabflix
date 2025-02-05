@@ -48,7 +48,8 @@ public class SingleMovieServlet extends HttpServlet {
         JsonWriter out = new JsonWriter(response.getWriter());
 
         // Get a connection from dataSource and let resource manager close the connection after usage.
-        try (Connection conn = dataSource.getConnection()) {
+        try (Connection conn = dataSource.getConnection())
+        {
             // Get a connection from dataSource
 
             // Construct a query with parameter represented by "?"
@@ -109,14 +110,14 @@ public class SingleMovieServlet extends HttpServlet {
             request.getServletContext().log("Error:", e);
             // Set response status to 500 (Internal Server Error)
             response.setStatus(500);
-        } finally {
+        }
+        finally {
             out.close();
         }
         long endTime = System.currentTimeMillis();
         System.out.println("single-movie request took:" + (endTime - startTime));
 
         // Always remember to close db connection after usage. Here it's done by try-with-resources
-
     }
 
 }

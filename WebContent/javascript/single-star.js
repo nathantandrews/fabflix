@@ -51,15 +51,7 @@ let starId = getParameterByName('id');
 jQuery.ajax({
     dataType: "json",
     method: "GET",
-    url: "api/single-star?id=" + starId,
+    url: "/Fabflix_war/api/single-star?id=" + starId,
     success: (resultData) => handleResult(resultData),
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-    const backHomeButton = `
-        <div class="back-home">
-            <button onclick="window.location.href='index.html'" class="btn btn-primary">Home</button>
-        </div>
-    `;
-    document.body.insertAdjacentHTML('afterbegin', backHomeButton);
-});
