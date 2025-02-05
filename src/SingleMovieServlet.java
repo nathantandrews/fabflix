@@ -123,7 +123,7 @@ public class SingleMovieServlet extends HttpServlet
             out.close();
         }
         long endTime = System.currentTimeMillis();
-        System.out.println("single-movie request took:" + (endTime - startTime));
+        System.out.println("single-movie request took:" + (endTime - startTime) + " ms");
 
         // Always remember to close db connection after usage. Here it's done by try-with-resources
     }

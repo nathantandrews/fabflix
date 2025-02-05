@@ -145,7 +145,7 @@ public class MovieListServlet extends HttpServlet
             out.close();
         }
         long endTime = System.currentTimeMillis();
-        System.out.println("movie-list request took:" + (endTime - startTime));
+        System.out.println("movie-list request took:" + (endTime - startTime) + " ms");
         // Always remember to close db connection after usage. Here it's done by try-with-resources
     }
     private String getTopThree(ResultSet rs, String columnName) throws SQLException

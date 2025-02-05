@@ -1,28 +1,14 @@
-body {
-    font-family: 'Poppins', sans-serif;
-    background-color: #f8f9fa;
-    color: #343a40;
-    padding: 20px;
-}
-
 h1 {
     text-align: center;
     color: #007bff;
     margin-bottom: 30px;
 }
 
-.movie-card {
-    margin: 15px 0;
-    padding: 15px;
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.movie-title {
-    color: #007bff;
-    font-weight: 600;
-    font-size: 1.5rem;
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8f9fa;
+    color: #343a40;
+    padding: 20px;
 }
 
 a {
@@ -40,6 +26,46 @@ footer {
     font-size: 0.9rem;
     margin-top: 30px;
 }
+
+table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+}
+
+th, td {
+    text-align: left;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #007bff;
+    color: white;
+}
+label {
+    font-size: x-large;
+}
+input {
+    font-size: x-large;
+    display: flex;
+    justify-content: center;
+}
+
+.movie-card {
+    margin: 15px 0;
+    padding: 15px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.movie-title {
+    color: #007bff;
+    font-weight: 600;
+    font-size: 1.5rem;
+}
+
 .section {
     margin: 20px auto;
     padding: 15px;
@@ -65,19 +91,45 @@ footer {
     border-bottom: 2px solid #f2f2f2;
     margin: 15px 0;
 }
-table {
-    width: 100%;
-    margin-top: 20px;
-    border-collapse: collapse;
+
+.login-box {
+    margin: auto;
+    padding: 100px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: center;
 }
 
-th, td {
-    text-align: left;
+.container {
+    text-align: center;
+    margin-top: 10%;
+}
+
+.btn-custom {
+    width: 200px;
     padding: 10px;
-    border-bottom: 1px solid #ddd;
+    font-size: 1.1rem;
+    border-radius: 5px;
+    margin: 10px;
 }
 
-th {
+.card {
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background: white;
+}
+
+.logout-btn {
     background-color: #007bff;
-    color: white;
+}
+.movie-list-btn {
+    background-color: #007bff;
+}
+
+.login-error-message {
+    padding: 20px;
+    text-align: center;
 }

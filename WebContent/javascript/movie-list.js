@@ -20,21 +20,6 @@ function handleResult(resultData) {
 
     resultData.forEach((movie) => {
 
-        //Early exit if more than 20 movies
-
-        // .split(',').slice(0, 3).join(', ')
-
-        //JS magic with .map (foreach loop essentially)
-        // let stars = movie["movie_stars"]
-        //     .split(',')
-        //     .slice(0, 3)
-        //     .map(s => {
-        //         const re = new RegExp("\\((.*?)\\)");
-        //         let id = re.exec(s)?.[1];
-        //         return `<a href="single-star.html?id=${id}">${s.split('(')[0]}</a>`;
-        //     })
-        //     .join(', ');
-
         let stars = "";
         const movie_stars_ids = movie["movie_stars_ids"].split(", ");
         const movie_stars_names = movie["movie_stars_names"].split(", ");
@@ -74,9 +59,9 @@ function handleError(resultData) {
 }
 // Fetch movie data from the API
 jQuery.ajax({
-    dataType: "json",
+    url: "../api/movie-list",
     method: "GET",
-    url: "/Fabflix_war/api/movie-list",
+    dataType: "json",
     success: handleResult,
     error: handleError
 });
