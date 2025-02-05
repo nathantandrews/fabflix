@@ -15,16 +15,21 @@ import java.sql.ResultSet;
 
 // Declaring a WebServlet called SingleMovieServlet, which maps to url "/api/single-movie"
 @WebServlet(name = "SingleMovieServlet", urlPatterns = "/api/single-movie")
-public class SingleMovieServlet extends HttpServlet {
+public class SingleMovieServlet extends HttpServlet
+{
     private static final long serialVersionUID = 2L;
 
     // Create a dataSource which registered in web.xml
     private DataSource dataSource;
 
-    public void init(ServletConfig config) {
-        try {
+    public void init(ServletConfig config)
+    {
+        try
+        {
             dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedb");
-        } catch (NamingException e) {
+        }
+        catch (NamingException e)
+        {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
@@ -34,7 +39,8 @@ public class SingleMovieServlet extends HttpServlet {
      * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
      * response)
      */
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException
+    {
         long startTime = System.currentTimeMillis();
         response.setContentType("application/json"); // Response mime type
 
@@ -78,9 +84,8 @@ public class SingleMovieServlet extends HttpServlet {
 
 
             out.beginArray();
-            while (rs.next()) {
-
-
+            while (rs.next())
+            {
                 // Create a JsonObject based on the data we retrieve from rs
                 out.beginObject();
                 out.name("movie_id").value(rs.getString("movieId"));
@@ -100,7 +105,9 @@ public class SingleMovieServlet extends HttpServlet {
             // Set response status to 200 (OK)
             response.setStatus(200);
 
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             // Write error message JSON object to output
             out.beginObject();
             out.name("errorMessage").value(e.getMessage());
@@ -111,7 +118,8 @@ public class SingleMovieServlet extends HttpServlet {
             // Set response status to 500 (Internal Server Error)
             response.setStatus(500);
         }
-        finally {
+        finally
+        {
             out.close();
         }
         long endTime = System.currentTimeMillis();
@@ -119,5 +127,4 @@ public class SingleMovieServlet extends HttpServlet {
 
         // Always remember to close db connection after usage. Here it's done by try-with-resources
     }
-
 }

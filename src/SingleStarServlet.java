@@ -17,16 +17,21 @@ import java.sql.ResultSet;
 
 // Declaring a WebServlet called SingleStarServlet, which maps to url "/api/single-star"
 @WebServlet(name = "SingleStarServlet", urlPatterns = "/api/single-star")
-public class SingleStarServlet extends HttpServlet {
+public class SingleStarServlet extends HttpServlet
+{
     private static final long serialVersionUID = 2L;
 
     // Create a dataSource which registered in web.xml
     private DataSource dataSource;
 
-    public void init(ServletConfig config) {
-        try {
+    public void init(ServletConfig config)
+    {
+        try
+        {
             dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedb");
-        } catch (NamingException e) {
+        }
+        catch (NamingException e)
+        {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
@@ -36,7 +41,8 @@ public class SingleStarServlet extends HttpServlet {
      * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
      * response)
      */
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException
+    {
         long startTime = System.currentTimeMillis();
         response.setContentType("application/json"); // Response mime type
 
@@ -50,7 +56,8 @@ public class SingleStarServlet extends HttpServlet {
         PrintWriter out = response.getWriter();
 
         // Get a connection from dataSource and let resource manager close the connection after usage.
-        try (Connection conn = dataSource.getConnection()) {
+        try (Connection conn = dataSource.getConnection())
+        {
             // Get a connection from dataSource
 
             // Construct a query with parameter represented by "?"
@@ -70,7 +77,8 @@ public class SingleStarServlet extends HttpServlet {
             JsonArray jsonArray = new JsonArray();
 
             // Iterate through each row of rs
-            while (rs.next()) {
+            while (rs.next())
+            {
 
                 String starId = rs.getString("starId");
                 String starName = rs.getString("name");
@@ -118,7 +126,5 @@ public class SingleStarServlet extends HttpServlet {
         long endTime = System.currentTimeMillis();
         System.out.println("single-star request took:" + (endTime - startTime));
         // Always remember to close db connection after usage. Here it's done by try-with-resources
-
     }
-
 }

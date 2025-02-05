@@ -16,18 +16,23 @@ import java.sql.Statement;
 
 // Declaring a WebServlet called SingleMovieServlet, which maps to url "/api/single-movie"
 @WebServlet(name = "MovieListServlet", urlPatterns = "/api/movie-list")
-public class MovieListServlet extends HttpServlet {
+public class MovieListServlet extends HttpServlet
+{
     private static final long serialVersionUID = 2L;
     private StringBuilder sb;
 
     // Create a dataSource which registered in web.xml
     private DataSource dataSource;
 
-    public void init(ServletConfig config) {
-        try {
+    public void init(ServletConfig config)
+    {
+        try
+        {
             dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedb");
             sb = new StringBuilder();
-        } catch (NamingException e) {
+        }
+        catch (NamingException e)
+        {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
@@ -37,7 +42,8 @@ public class MovieListServlet extends HttpServlet {
      * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
      * response)
      */
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException
+    {
         long startTime = System.currentTimeMillis();
         response.setContentType("application/json"); // Response mime type
         response.setCharacterEncoding("UTF-8");
@@ -51,7 +57,8 @@ public class MovieListServlet extends HttpServlet {
         JsonWriter out = new JsonWriter(response.getWriter());
 
         // Get a connection from dataSource and let resource manager close the connection after usage.
-        try (Connection conn = dataSource.getConnection()) {
+        try (Connection conn = dataSource.getConnection())
+        {
             // Get a connection from dataSource
 
             String movieQuery = "SELECT m.id AS movie_id, m.title AS movie_title, " +
@@ -121,7 +128,9 @@ public class MovieListServlet extends HttpServlet {
             // Set response status to 200 (OK)
             response.setStatus(200);
 
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             // Write error message JSON object to output
             out.beginObject();
             out.name("error").value(e.getMessage());
@@ -130,7 +139,9 @@ public class MovieListServlet extends HttpServlet {
             request.getServletContext().log("Error:", e);
             // Set response status to 500 (Internal Server Error)
             response.setStatus(500);
-        } finally {
+        }
+        finally
+        {
             out.close();
         }
         long endTime = System.currentTimeMillis();
