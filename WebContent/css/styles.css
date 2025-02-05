@@ -112,7 +112,7 @@ input {
     padding: 10px;
     font-size: 1.1rem;
     border-radius: 5px;
-    margin: 10px;
+    margin: 0;
 }
 
 .card {
@@ -122,14 +122,33 @@ input {
     background: white;
 }
 
+.nav-placeholder {
+
+}
+
 .logout-btn {
-    background-color: #007bff;
+    display: inline-block;
 }
 .movie-list-btn {
-    background-color: #007bff;
+    display: inline-block;
 }
 
 .login-error-message {
     padding: 20px;
     text-align: center;
 }
+
+.btn-logout {
+    background-color: #ff0000;
+    border-color: #ff0000;
+}
+
+.btn-logout:hover {
+    background-color: #d90000;
+    border-color: #d90000;
+}
+
+/*.btn-logout:focus {*/
+/*    outline:0;*/
+/*    box-shadow:0 0 0 .2rem rgba(255,123,0,.25);*/
+/*}*/

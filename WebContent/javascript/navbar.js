@@ -5,7 +5,7 @@ function createNavbar()
         navbar.id = "nav-placeholder";
         navbar.classList.add("nav-placeholder");
         document.body.insertAdjacentElement('afterbegin', navbar);
-        fetch("navbar.html")
+        fetch("../html/navbar.html")
             .then(response => response.text())
             .then(data => {
                 navbar.innerHTML = data;
