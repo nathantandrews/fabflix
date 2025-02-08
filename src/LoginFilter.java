@@ -55,7 +55,7 @@ public class LoginFilter implements Filter
          */
         String fullURIString = requestURI.toLowerCase();
         System.out.println("isUrlAllowedWithoutLogin: " + fullURIString);
-        String partialURIString = fullURIString.replace(this.contextPath.toLowerCase() + "/", "");
+        String partialURIString = fullURIString.replaceFirst(this.contextPath.toLowerCase() + "/", "");
         System.out.println("partialURIString: " + partialURIString);
         return allowedURIs.stream().anyMatch(partialURIString::equals);
     }
@@ -66,6 +66,7 @@ public class LoginFilter implements Filter
         allowedURIs.add("javascript/login.js");
         allowedURIs.add("css/styles.css");
         allowedURIs.add("api/login");
+        allowedURIs.add("images/favicon.ico");
     }
 
     public void destroy()

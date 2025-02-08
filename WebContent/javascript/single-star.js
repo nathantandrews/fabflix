@@ -51,7 +51,7 @@ let starId = getParameterByName('id');
 jQuery.ajax({
     dataType: "json",
     method: "GET",
-    url: "/Fabflix_war/api/single-star?id=" + starId,
+    url: "/api/single-star?id=" + starId,
     success: (resultData) => handleResult(resultData),
 });
 

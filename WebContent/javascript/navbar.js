@@ -1,6 +1,8 @@
 function createNavbar()
 {
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', () =>
+    {
+        console.log("createNavbar running")
         const navbar = document.createElement('div');
         navbar.id = "nav-placeholder";
         navbar.classList.add("nav-placeholder");
@@ -13,5 +15,9 @@ function createNavbar()
             .catch(error => console.error("Error loading navbar:", error));
     });
 }
+function backToList()
+{
+    window.location.href = sessionStorage.getItem("lastMovieListURL");
+}
 
-export {createNavbar}
+createNavbar();

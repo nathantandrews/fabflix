@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Page</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <div class="total-price-card">
+        <h1>Your Total</h1>
+        <p id="totalPrice">Loading...</p>
+        <form id="paymentForm" action="/api/payment" method="POST">
+            <h2>Payment Details</h2>
+            <div class="input-group">
+                <label for="firstName">First Name:</label><br>
+                <input type="text" id="firstName" name="firstName" required><br>
+            </div>
+            <div class="input-group">
+                <label for="lastName">Last Name:</label><br>
+                <input type="text" id="lastName" name="lastName" required><br>
+            </div>
+            <div class="input-group">
+                <label for="cardNumber">Credit Card Number:</label><br>
+                <input type="text" id="cardNumber" name="cardNumber" required><br>
+            </div>
+            <div class="input-group">
+                <label for="expirationDate">Expiration Date (MM/YY):</label><br>
+                <input type="text" id="expirationDate" name="expirationDate" required><br>
+            </div>
+            <button type="submit" class="submit-btn">Place Order</button>
+        </form>
+        <div id="error-message" style="color:red; display:none;"></div>
+    </div>
+</div>
+
+<script>
+    function fetchTotalPrice() {
+        $.ajax({
+            url: 'api/index',
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+
+                $('#totalPrice').text(`$${data.totalPrice.toFixed(2)}`);
+
+
+                const movieTitles = data.cart.map(item => item.title);
+                console.log("Movie Titles:", movieTitles);
+
+
+                $('#paymentForm').data('movieTitles', movieTitles);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching total price and movie titles:', error);
+                console.log(xhr.responseText);
+            }
+        });
+    }
+
+    $('#paymentForm').on('submit', function(event) {
+        event.preventDefault();
+
+
+        const formData = $(this).serialize();
+        const movieTitles = $(this).data('movieTitles');
+
+        //VERY annoying to have had to do it this way... do not know why but this took while a long time to figure out
+        const requestData = {
+            ...JSON.parse('{"' + decodeURIComponent(formData).replace(/&/g, '","').replace(/=/g, '":"') + '"}'),
+            movieTitles: movieTitles
+        };
+
+        $.ajax({
+            url: 'api/payment',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(requestData),
+            dataType: 'json',
+            success: function(data) {
+                if (data.success) {
+                    alert("Payment successful! Your order is placed.");
+                    window.location.href = "confirmation.html"
+                } else {
+                    let errorMessage = jQuery('#error-message');
+                    errorMessage.text(data.message || "Payment failed! Please check your details and try again.");
+                    errorMessage.show();
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                console.log(xhr.responseText);
+                alert("An error occurred. Please try again.");
+            }
+        });
+    });
+
+    $(document).ready(function() {
+        fetchTotalPrice();
+    });
+</script>
+</body>
+</html>

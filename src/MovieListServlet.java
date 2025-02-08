@@ -9,157 +9,210 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
-// Declaring a WebServlet called SingleMovieServlet, which maps to url "/api/single-movie"
 @WebServlet(name = "MovieListServlet", urlPatterns = "/api/movie-list")
-public class MovieListServlet extends HttpServlet
-{
+public class MovieListServlet extends HttpServlet {
     private static final long serialVersionUID = 2L;
-    private StringBuilder sb;
-
-    // Create a dataSource which registered in web.xml
     private DataSource dataSource;
 
-    public void init(ServletConfig config)
-    {
-        try
-        {
+    public void init(ServletConfig config) {
+        try {
             dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedb");
-            sb = new StringBuilder();
-        }
-        catch (NamingException e)
-        {
+        } catch (NamingException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
     }
 
-    /**
-     * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
-     * response)
-     */
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
     {
         long startTime = System.currentTimeMillis();
-        response.setContentType("application/json"); // Response mime type
-        response.setCharacterEncoding("UTF-8");
-        // Retrieve parameter id from url request.
-        // String id = request.getParameter("id");
 
-        // The log message can be found in localhost log
-        // request.getServletContext().log("getting id: " + id);
+        response.setContentType("application/json");
 
-        // Output stream to STDOUT
-        JsonWriter out = new JsonWriter(response.getWriter());
+        String title = request.getParameter("title");
+        String year = request.getParameter("year");
+        String director = request.getParameter("director");
+        String star = request.getParameter("star");
+        String genre = request.getParameter("genre");
 
-        // Get a connection from dataSource and let resource manager close the connection after usage.
-        try (Connection conn = dataSource.getConnection())
+        int moviesPerPage = 10; // Default movies per page
+        int currentPage = 1;     // Default page
+
+        if (request.getParameter("moviesPerPage") != null)
         {
-            // Get a connection from dataSource
+            moviesPerPage = Integer.parseInt(request.getParameter("moviesPerPage"));
+        }
+        if (request.getParameter("page") != null)
+        {
+            currentPage = Integer.parseInt(request.getParameter("page"));
+        }
 
-            String movieQuery = "SELECT m.id AS movie_id, m.title AS movie_title, " +
-                    "m.year AS movie_year, m.director AS movie_director, " +
-                    "r.rating AS movie_rating\n" +
-                    "FROM movies m\n" +
-                    "         JOIN ratings r ON m.id = r.movieId\n" +
-                    "ORDER BY r.rating DESC\n" +
-                    "LIMIT 20;";
-            String genreQuery = "SELECT gim.movieId, GROUP_CONCAT(g.name ORDER BY g.name SEPARATOR ',') AS movie_genres\n" +
-                    "FROM genres_in_movies gim\n" +
-                    "         JOIN genres g ON gim.genreId = g.id\n" +
-                    "         JOIN (SELECT m.id AS movie_id, r.rating\n" +
-                    "               FROM movies m\n" +
-                    "                        JOIN ratings r ON m.id = r.movieId\n" +
-                    "               ORDER BY r.rating DESC\n" +
-                    "               LIMIT 20) AS mi ON mi.movie_id = gim.movieId\n" +
-                    "GROUP BY gim.movieId, mi.rating\n" +
-                    "ORDER BY mi.rating DESC;";
-            String starQuery = "SELECT sim.movieId, GROUP_CONCAT(s.name ORDER BY s.name SEPARATOR ',') AS movie_stars_names,\n" +
-                    "       GROUP_CONCAT(s.id SEPARATOR ',') AS movie_stars_ids\n" +
-                    "FROM stars_in_movies sim\n" +
-                    "         JOIN stars s ON sim.starId = s.id\n" +
-                    "         JOIN (SELECT m.id AS movie_id, r.rating\n" +
-                    "               FROM movies m\n" +
-                    "                        JOIN ratings r ON m.id = r.movieId\n" +
-                    "               ORDER BY r.rating DESC\n" +
-                    "               LIMIT 20) AS mi ON mi.movie_id = sim.movieId\n" +
-                    "GROUP BY sim.movieId, mi.rating\n" +
-                    "ORDER BY mi.rating DESC;";
 
-            // Declare our statements
-            Statement movieStatement = conn.createStatement();
-            Statement genreStatement = conn.createStatement();
-            Statement starStatement = conn.createStatement();
+        System.out.println("got to after params");
 
-            // Perform the query
-            ResultSet mrs = movieStatement.executeQuery(movieQuery);
-            ResultSet grs = genreStatement.executeQuery(genreQuery);
-            ResultSet srs = starStatement.executeQuery(starQuery);
+        int offset = (currentPage - 1) * moviesPerPage;
 
-            // Iterate through each row of rs
-            out.beginArray();
-            // Iterate through each row of rs
-            while (mrs.next() && grs.next() && srs.next())
+        moviesPerPage = Math.max(1, moviesPerPage);
+        offset = Math.max(0, offset);
+
+        List<String> conditions = new ArrayList<>();
+        List<Object> parameters = new ArrayList<>();
+
+        if (year != null && !year.isEmpty())
+        {
+            conditions.add("m.year = ?");
+            parameters.add(year);
+        }
+        if (genre != null && !genre.isEmpty())
+        {
+            conditions.add("gm.genreId = ?");
+            parameters.add(Integer.valueOf(genre));
+        }
+        if (title != null && !title.isEmpty())
+        {
+            conditions.add("LOWER(m.title) LIKE LOWER(?) ");
+            parameters.add(title + "%");
+        }
+        if (director != null && !director.isEmpty())
+        {
+            conditions.add("LOWER(m.director) LIKE LOWER(?) ");
+            parameters.add(director + "%");
+        }
+        if (star != null && !star.isEmpty())
+        {
+            conditions.add("LOWER(s.name) LIKE LOWER(?) ");
+            parameters.add(star + "%");
+        }
+
+
+        System.out.println("got to after conditions");
+
+        StringBuilder countQuery = new StringBuilder(
+                "SELECT COUNT(DISTINCT m.id) AS totalMovies " +
+                        "FROM movies m " +
+                        "LEFT JOIN genres_in_movies gm ON m.id = gm.movieId " +
+                        "LEFT JOIN genres g ON gm.genreId = g.id " +
+                        "LEFT JOIN stars_in_movies sm ON m.id = sm.movieId " +
+                        "LEFT JOIN stars s ON sm.starId = s.id " +
+                        "LEFT JOIN ratings r ON r.movieId = m.id "
+        );
+        StringBuilder mainQuery = new StringBuilder(
+                "SELECT m.id, m.title, m.year, m.director, m.cost, " +
+                        "GROUP_CONCAT(DISTINCT CONCAT(g.name, '(', g.id, ')') ORDER BY g.name SEPARATOR ',') as genres, " +
+                        "GROUP_CONCAT(DISTINCT CONCAT(s.name, '(', s.id, ')') ORDER BY sc.movieCount DESC, s.name ASC SEPARATOR ',') as stars, " +
+                        "r.rating " +
+                        "FROM movies m " +
+                        "LEFT JOIN genres_in_movies gm ON m.id = gm.movieId " +
+                        "LEFT JOIN genres g ON gm.genreId = g.id " +
+                        "LEFT JOIN stars_in_movies sm ON m.id = sm.movieId " +
+                        "LEFT JOIN stars s ON sm.starId = s.id " +
+                        "LEFT JOIN ratings r ON r.movieId = m.id " +
+                        "LEFT JOIN (SELECT sim2.starId, COUNT(sim2.movieId) AS movieCount " +
+                        "           FROM stars_in_movies sim2 " +
+                        "           GROUP BY sim2.starId) AS sc ON sc.starId = sm.starId "
+        );
+
+
+        if (!conditions.isEmpty())
+        {
+            String whereClause = " WHERE " + String.join(" AND ", conditions);
+            countQuery.append(whereClause);
+            mainQuery.append(whereClause);
+        }
+
+        System.out.println("got to after first query build");
+
+        countQuery.append(";");
+        mainQuery.append(" GROUP BY m.id, m.title, m.year, m.director, r.rating ");
+        mainQuery.append(" LIMIT ? OFFSET ?;");
+
+        System.out.println("got to after second query build");
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement countPs = conn.prepareStatement(countQuery.toString());
+             PreparedStatement mainPs = conn.prepareStatement(mainQuery.toString()))
+        {
+            for (int i = 0; i < parameters.size(); i++)
             {
-                out.beginObject();
-                out.name("movie_id").value(mrs.getString("movie_id"));
-                out.name("movie_title").value(mrs.getString("movie_title"));
-                out.name("movie_year").value(mrs.getString("movie_year"));
-                out.name("movie_director").value(mrs.getString("movie_director"));
-                out.name("movie_genres").value(getTopThree(grs, "movie_genres"));
-                out.name("movie_stars_names").value(getTopThree(srs, "movie_stars_names"));
-                out.name("movie_stars_ids").value(getTopThree(srs, "movie_stars_ids"));
-                out.name("movie_rating").value(mrs.getString("movie_rating"));
-                out.endObject();
+                countPs.setObject(i + 1, parameters.get(i));
             }
-            out.endArray();
 
-            mrs.close();
-            grs.close();
-            srs.close();
-            movieStatement.close();
-            genreStatement.close();
-            starStatement.close();
+            System.out.println("got to after count query params");
 
-            // Set response status to 200 (OK)
-            response.setStatus(200);
 
+            System.out.println("CountPS: " + countPs.toString());
+
+            ResultSet countRs = countPs.executeQuery();
+            System.out.println("got to after executing count query");
+            int totalMovies = 0;
+            if (countRs.next())
+            {
+                totalMovies = countRs.getInt("totalMovies");
+            }
+
+            System.out.println("got to after count query results");
+
+            for (int i = 0; i < parameters.size(); i++)
+            {
+                mainPs.setObject(i + 1, parameters.get(i));
+            }
+            System.out.println("got to after main query params");
+
+            mainPs.setInt(parameters.size() + 1, moviesPerPage);
+            mainPs.setInt(parameters.size() + 2, offset);
+
+            ResultSet rs = mainPs.executeQuery();
+
+            StringWriter stringWriter = new StringWriter();
+            JsonWriter jsonWriter = new JsonWriter(stringWriter);
+
+            jsonWriter.beginObject();
+            jsonWriter.name("totalMovies").value(totalMovies);
+            jsonWriter.name("movies").beginArray();
+            while (rs.next())
+            {
+                jsonWriter.beginObject();
+                jsonWriter.name("id").value(rs.getString("id"));
+                jsonWriter.name("rating").value(rs.getDouble("rating"));
+                jsonWriter.name("title").value(rs.getString("title"));
+                jsonWriter.name("year").value(rs.getInt("year"));
+                jsonWriter.name("director").value(rs.getString("director"));
+                jsonWriter.name("cost").value(rs.getDouble("cost"));
+                jsonWriter.name("genres").value(rs.getString("genres"));
+                jsonWriter.name("stars").value(rs.getString("stars"));
+                jsonWriter.endObject();
+            }
+            jsonWriter.endArray();
+            jsonWriter.endObject();
+            System.out.println("JSON Response: " + stringWriter); // ✅ Debug output
+
+            response.getWriter().write(stringWriter.toString()); // Send response
+            rs.close();
         }
         catch (Exception e)
         {
-            // Write error message JSON object to output
-            out.beginObject();
-            out.name("error").value(e.getMessage());
-            out.endObject();
-            // Log error to localhost log
-            request.getServletContext().log("Error:", e);
-            // Set response status to 500 (Internal Server Error)
             response.setStatus(500);
-        }
-        finally
-        {
-            out.close();
-        }
-        long endTime = System.currentTimeMillis();
-        System.out.println("movie-list request took:" + (endTime - startTime) + " ms");
-        // Always remember to close db connection after usage. Here it's done by try-with-resources
-    }
-    private String getTopThree(ResultSet rs, String columnName) throws SQLException
-    {
-        sb.setLength(0);
-        String[] list = rs.getString(columnName).split(",");
-        for (int i = 0; i < 3 && i < list.length; i++)
-        {
-            if (i > 0)
-            {
-                sb.append(", ");
+            //Weird errors getting on not using the same jsonWriter or something?
+            try (JsonWriter jw = new JsonWriter(new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8))) {
+                jw.beginObject();
+                jw.name("error").value("Internal Server Error: " + e.getMessage());
+                jw.endObject();
             }
-            sb.append(list[i]);
+            catch (IOException ioException)
+            {
+                ioException.printStackTrace();
+            }
+            long endTime = System.currentTimeMillis();
+            System.out.println("movie-list request took:" + (endTime - startTime) + " ms");
         }
-        return sb.toString();
     }
 }

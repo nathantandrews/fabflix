@@ -108,11 +108,11 @@ input {
 }
 
 .btn-custom {
-    width: 200px;
+    width: 250px;
     padding: 10px;
     font-size: 1.1rem;
     border-radius: 5px;
-    margin: 0;
+    margin: 5px;
 }
 
 .card {
@@ -146,6 +146,23 @@ input {
 .btn-logout:hover {
     background-color: #d90000;
     border-color: #d90000;
+}
+.form-group label {
+    font-weight: 600;
+}
+.submenu {
+    margin-bottom: 20px;
+}
+
+.submenu a {
+    margin: 0 5px;
+    cursor: pointer;
+    text-decoration: none;
+    color: #007bff;
+}
+
+.submenu a:hover {
+    text-decoration: underline;
 }
 
 /*.btn-logout:focus {*/

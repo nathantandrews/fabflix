@@ -9,9 +9,6 @@
  *      3. Populate the data to correct html elements.
  */
 
-
-import {createNavbar} from "./navbar.js";
-
 /**
  * Retrieve parameter from request URL, matching by parameter name
  * @param target String
@@ -106,28 +103,14 @@ function getColorForRating(rating) {
     const green = Math.min(255, Math.max(0, Math.floor((rating / 10) * 255)));
     return `rgb(${red}, ${green}, 0)`;
 }
-
-createNavbar();
-// document.addEventListener('DOMContentLoaded', () => {
-//     const backHomeButton = `
-//         <div class="back-home">
-//             <button onclick="window.location.href='index.html'" class="btn btn-primary">Home</button>
-//         </div>
-//     `;
-//     document.body.insertAdjacentHTML('afterbegin', backHomeButton);
-// });
 /**
- * Once this .js is loaded, following scripts will be executed by the browser\
+ * Once this .js is loaded, following scripts will be executed by the browser
  */
-
-// Get id from URL
-let movieId = getParameterByName('id');
-
 // Makes the HTTP GET request and registers on success callback function handleResult
 jQuery.ajax({
     dataType: "json",  // Setting return data type
     method: "GET",// Setting request method
-    url: "/Fabflix_war/api/single-movie?id=" + movieId, // Setting request url, which is mapped by StarsServlet in Stars.java
+    url: "/api/single-movie?id=" + getParameterByName('id'), // Setting request url, which is mapped by StarsServlet in Stars.java
     success: (resultData) => handleResult(resultData) // Setting callback function to handle data returned successfully by the SingleStarServlet
 });
 
