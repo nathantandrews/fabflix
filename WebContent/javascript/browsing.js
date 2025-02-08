@@ -51,14 +51,6 @@ function createBrowseOptions(btn)
     titleMenu.empty();
     if (btn.innerText === "Browse by Genre")
     {
-        const characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ*";
-        for (let char of characters)
-        {
-            titleMenu.append(`<a onclick="prepareSearch('${char}', 'c')">${char}</a>`);
-        }
-    }
-    else if (btn.innerText === "Browse by Character")
-    {
         jQuery.ajax
         ({
             url: "api/browsing",
@@ -67,7 +59,14 @@ function createBrowseOptions(btn)
             error: (resultData) => handleError(resultData)
         });
     }
-
+    else if (btn.innerText === "Browse by Character")
+    {
+        const characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ*";
+        for (let char of characters)
+        {
+            titleMenu.append(`<a onclick="prepareSearch('${char}', 'c')">${char}</a>`);
+        }
+    }
     // toggle the button
     let btnText = btn.innerText;
     btn.innerText = (btnText === 'Browse by Genre') ? 'Browse by Character' : 'Browse by Genre';
