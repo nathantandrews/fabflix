@@ -104,7 +104,7 @@ input {
 
 .container {
     text-align: center;
-    margin-top: 10%;
+    margin-top: 1%;
 }
 
 .btn-custom {
@@ -121,16 +121,23 @@ input {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     background: white;
 }
-
-.nav-placeholder {
-
+.navbar {
+    display: inline-flex;
+    width: 100%;
+    justify-content: center;
+    margin: 0 auto;
 }
-
 .logout-btn {
-    display: inline-block;
+    margin: 0 auto;
 }
 .movie-list-btn {
-    display: inline-block;
+    margin: 0 auto;
+}
+.main-btn {
+    margin: 0 auto;
+}
+.checkout-btn {
+    margin: 0 auto;
 }
 
 .login-error-message {
@@ -147,6 +154,23 @@ input {
     background-color: #d90000;
     border-color: #d90000;
 }
+.btn-movie-list {
+    background-color: #00e066;
+    border-color: #00e066;
+}
+.btn-movie-list:hover {
+    background-color: #00b854;
+    border-color: #00b854;
+}
+.btn-checkout {
+    background-color: #ff8800;
+    border-color: #ff8800;
+}
+.btn-checkout:hover {
+    background-color: #cc6d00;
+    border-color: #cc6d00;
+}
+
 .form-group label {
     font-weight: 600;
 }
@@ -165,7 +189,10 @@ input {
     text-decoration: underline;
 }
 
+
+
 /*.btn-logout:focus {*/
 /*    outline:0;*/
 /*    box-shadow:0 0 0 .2rem rgba(255,123,0,.25);*/
 /*}*/
+

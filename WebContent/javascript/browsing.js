@@ -1,84 +1,102 @@
-let switcher = jQuery("#switcher-btn");
-switcher.click(() => createBrowseOptions(switcher));
-let titleMenu = jQuery("#title-submenu");
+let switchBtn = jQuery("#switcher-btn");
+let switched = false;
+switchBtn.append(`<button class="btn btn-primary" onClick="createBrowseOptions()">Browse by Genre</button>`);
 
-function handleResult(resultData, type)
-{
-    let movieList = "<ul class='list-group'>";
-    resultData.forEach(movie => {
-        if (type === "genre")
-        {
-        movieList += `<li class='list-group-item'>
-                            <a href='movie-list.html?genre=${movie.genreId}' class='text-decoration-none' style='color: #007bff;'>${movie.genreName}</a>
-                        </li>`;
-        }
-        else if (type === "title")
-        {
-        movieList += `<li class='list-group-item'>
-                    <a href='single-movie.html?id=${movie.id}' class='text-decoration-none' style='color: #007bff;'>${movie.title}</a>
-                </li>`;
-        }
-    });
-    movieList += "</ul>";
-    jQuery("#movie-container").html(movieList);
-}
+let titleMenu = jQuery("#title-submenu");
+console.log("before creating browse options");
+createBrowseOptions();
+console.log("after creating browse options");
+
 function handleError(resultData)
 {
     console.log("Error: " + resultData)
 }
 
-function handleGenreResult(resultData)
+function handleResult(resultData)
 {
-    resultData.forEach( (genre) =>
-    {
-        titleMenu.append(`<a onclick="prepareSearch(genre.id, 'g')">${genre.name}&nbsp</a>`);
-    })
+    // console.log(resultData);
+    resultData = JSON.parse(resultData);
+    // Create a table structure
+    let table = `<table class="table table-striped"><tbody><tr>`;
+    let itemsPerRow = 5;
+    resultData.forEach((genre, index) => {
+        table += `<td><a onclick="searchForMovies('${genre.id}', 'g')">${genre.name}</a></td>`;
+        if ((index + 1) % itemsPerRow === 0) {
+            table += `</tr><tr>`;
+        }
+    });
+
+    table += `</tr></tbody></table>`;
+    titleMenu.append(table);
 }
 
-function prepareSearch(filter, type)
+function searchForMovies(filter, type)
 {
-    let url = "";
+    let queryParams = [];
     switch (type)
     {
-        case 'c': url = `api/search?title=${filter}`; break;
-        case 'g': url = `api/search?genre=${filter}`; break;
+        case 'c':
+            sessionStorage.setItem("title", filter);
+            queryParams.push(`title=${encodeURIComponent(filter)}`);
+            break;
+        case 'g':
+            sessionStorage.setItem("genre", filter);
+            queryParams.push(`genre=${encodeURIComponent(filter)}`);
+            break;
+        default:
+            console.warn("Invalid search type:", type);
+            break;
     }
-    window.location.href = url;
+    const page = 1;
+    const sortBy = "rating-desc-title-asc";
+    const moviesPerPage = 10;
+    queryParams.push(`moviesperpage=${encodeURIComponent(moviesPerPage)}`);
+    queryParams.push(`sortby=${encodeURIComponent(sortBy)}`);
+    queryParams.push(`page=${encodeURIComponent(page)}`);
+    const queryString = queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
+    window.location.href = `movie-list.html${queryString}`;
 }
 
-function createBrowseOptions(btn)
+function createBrowseOptions()
 {
     titleMenu.empty();
-    if (btn.innerText === "Browse by Genre")
+    switchBtn.empty();
+    if (!switched)
     {
+        switchBtn.append(`<button class="btn btn-primary" onClick="createBrowseOptions()">Browse by Genre</button>`);
+        const characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ*";
+        let table = `<table class="table table-striped"><tbody><tr>`;
+        const itemsPerRow = 10;
+        for (let i = 0; i < characters.length; ++i)
+        {
+            table += `<td><a onclick="searchForMovies('${characters[i]}', 'c')">${characters[i]}</a></td>`;
+            if ((i + 1) % itemsPerRow === 0) {
+                table += `</tr><tr>`;
+            }
+        }
+        table += `</tr></tbody></table>`;
+        titleMenu.append(table);
+    }
+    else
+    {
+        switchBtn.append(`<button class="btn btn-primary" onClick="createBrowseOptions()">Browse by Title</button>`);
         jQuery.ajax
         ({
-            url: "api/browsing",
+            url: "/api/browsing",
             method: "GET",
-            success: (resultData) => handleGenreResult(resultData),
+            success: (resultData) => handleResult(resultData),
             error: (resultData) => handleError(resultData)
         });
     }
-    else if (btn.innerText === "Browse by Character")
-    {
-        const characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ*";
-        for (let char of characters)
-        {
-            titleMenu.append(`<a onclick="prepareSearch('${char}', 'c')">${char}</a>`);
-        }
-    }
-    // toggle the button
-    let btnText = btn.innerText;
-    btn.innerText = (btnText === 'Browse by Genre') ? 'Browse by Character' : 'Browse by Genre';
+    switched = !switched;
 }
 
-createBrowseOptions(switcher);
-    // document.addEventListener('DOMContentLoaded', () =>
-    // {
-    //     const checkoutButton = `
-    //         <div class="checkout">
-    //             <button onclick="window.location.href='shopping-cart.html'" class="btn btn-primary">Checkout</button>
-    //         </div>
-    //     `;
-    //     document.body.insertAdjacentHTML('afterbegin', checkoutButton);
-    // });
+// document.addEventListener('DOMContentLoaded', () =>
+// {
+//     const checkoutButton = `
+//         <div class="checkout">
+//             <button onclick="window.location.href='shopping-cart.html'" class="btn btn-primary">Checkout</button>
+//         </div>
+//     `;
+//     document.body.insertAdjacentHTML('afterbegin', checkoutButton);
+// });

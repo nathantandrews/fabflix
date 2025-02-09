@@ -25,18 +25,17 @@ public class BrowsingServlet extends HttpServlet
         }
         catch (NamingException e)
         {
-            //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
     }
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
     {
-        try (Connection conn = dataSource.getConnection())
+        String query = "SELECT DISTINCT g.id AS genre_id, g.name AS genre_name FROM genres g";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery();
+             JsonWriter jsonWriter = new JsonWriter(response.getWriter()))
         {
-            String query = "SELECT DISTINCT g.id AS genre_id, g.name AS genre_name FROM genres g";
-            PreparedStatement ps = conn.prepareStatement(query);
-            ResultSet rs = ps.executeQuery();
-            JsonWriter jsonWriter = new JsonWriter(response.getWriter());
             jsonWriter.beginArray();
             while (rs.next())
             {
@@ -46,7 +45,6 @@ public class BrowsingServlet extends HttpServlet
                 jsonWriter.endObject();
             }
             jsonWriter.endArray();
-            jsonWriter.close();
         }
         catch (Exception e)
         {

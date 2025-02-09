@@ -10,7 +10,6 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -27,7 +26,6 @@ public class MovieListServlet extends HttpServlet {
         try {
             dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedb");
         } catch (NamingException e) {
-            //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
     }
@@ -44,25 +42,58 @@ public class MovieListServlet extends HttpServlet {
         String star = request.getParameter("star");
         String genre = request.getParameter("genre");
 
-        int moviesPerPage = 10; // Default movies per page
-        int currentPage = 1;     // Default page
-
-        if (request.getParameter("moviesPerPage") != null)
+        System.out.println("after getting parameters");
+        String sortBy = "";
+        int currentPage = 1;
+        int moviesPerPage = 10;
+        try
         {
-            moviesPerPage = Integer.parseInt(request.getParameter("moviesPerPage"));
+            sortBy = request.getParameter("sortBy") != null ? request.getParameter("sortBy") : "rating-desc-title-asc";
+            currentPage = request.getParameter("page") != null ? Integer.parseInt(request.getParameter("page")) : 1;
+            moviesPerPage = request.getParameter("moviesPerPage") != null ? Integer.parseInt(request.getParameter("moviesPerPage")) : 10;
         }
-        if (request.getParameter("page") != null)
+        catch (Exception e)
         {
-            currentPage = Integer.parseInt(request.getParameter("page"));
+            e.printStackTrace();
         }
 
+        System.out.println("after parsing moviesperpage");
+
+        String orderByClause = "ORDER BY ";
+        switch (sortBy)
+        {
+            case "title-asc-rating-asc":
+                orderByClause += "m.title ASC, r.rating ASC";
+                break;
+            case "title-asc-rating-desc":
+                orderByClause += "m.title ASC, r.rating DESC";
+                break;
+            case "title-desc-rating-desc":
+                orderByClause += "m.title DESC, r.rating DESC";
+                break;
+            case "title-desc-rating-asc":
+                orderByClause += "m.title DESC, r.rating ASC";
+                break;
+            case "rating-asc-title-asc":
+                orderByClause += "r.rating ASC, m.title ASC";
+                break;
+            case "rating-asc-title-desc":
+                orderByClause += "r.rating ASC, m.title DESC";
+                break;
+            case "rating-desc-title-desc":
+                orderByClause += "r.rating DESC, m.title DESC";
+                break;
+            case "rating-desc-title-asc":
+                orderByClause += "r.rating DESC, m.title ASC";
+            default:
+                orderByClause += "";
+                break;
+        }
 
         System.out.println("got to after params");
 
-        int offset = (currentPage - 1) * moviesPerPage;
-
         moviesPerPage = Math.max(1, moviesPerPage);
-        offset = Math.max(0, offset);
+        int offset = Math.max(0, (currentPage - 1) * moviesPerPage);
 
         List<String> conditions = new ArrayList<>();
         List<Object> parameters = new ArrayList<>();
@@ -79,8 +110,16 @@ public class MovieListServlet extends HttpServlet {
         }
         if (title != null && !title.isEmpty())
         {
-            conditions.add("LOWER(m.title) LIKE LOWER(?) ");
-            parameters.add(title + "%");
+            if (title.equals("*"))
+            {
+                conditions.add("LOWER(m.title) REGEXP ?");
+                parameters.add("^[^a-zA-Z0-9]");
+            }
+            else
+            {
+                conditions.add("LOWER(m.title) LIKE LOWER(?) ");
+                parameters.add(title + "%");
+            }
         }
         if (director != null && !director.isEmpty())
         {
@@ -133,6 +172,7 @@ public class MovieListServlet extends HttpServlet {
 
         countQuery.append(";");
         mainQuery.append(" GROUP BY m.id, m.title, m.year, m.director, r.rating ");
+        mainQuery.append(orderByClause);
         mainQuery.append(" LIMIT ? OFFSET ?;");
 
         System.out.println("got to after second query build");
@@ -167,13 +207,15 @@ public class MovieListServlet extends HttpServlet {
             }
             System.out.println("got to after main query params");
 
+            System.out.println("MainPS: " + mainPs.toString());
+
             mainPs.setInt(parameters.size() + 1, moviesPerPage);
             mainPs.setInt(parameters.size() + 2, offset);
 
+
             ResultSet rs = mainPs.executeQuery();
 
-            StringWriter stringWriter = new StringWriter();
-            JsonWriter jsonWriter = new JsonWriter(stringWriter);
+            JsonWriter jsonWriter = new JsonWriter(response.getWriter());
 
             jsonWriter.beginObject();
             jsonWriter.name("totalMovies").value(totalMovies);
@@ -193,9 +235,7 @@ public class MovieListServlet extends HttpServlet {
             }
             jsonWriter.endArray();
             jsonWriter.endObject();
-            System.out.println("JSON Response: " + stringWriter); // ✅ Debug output
 
-            response.getWriter().write(stringWriter.toString()); // Send response
             rs.close();
         }
         catch (Exception e)

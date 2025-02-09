@@ -17,6 +17,24 @@
 
 <div class="container">
     <h1>Movies</h1>
+    <label for="sort-options">Sort List By:</label>
+    <select id="sort-options">
+
+        <!-- default value -->
+        <option selected = "selected" value="rating-desc-title-asc">Rating DESC, then Title ASC</option>
+
+        <option value="rating-desc-title-desc">Rating DESC, then Title DESC</option>
+        
+        <option value="title-asc-rating-asc">Title ASC, then Rating ASC</option>
+        <option value="title-asc-rating-desc">Title ASC, then Rating DESC</option>
+        
+        <option value="title-desc-rating-desc">Title DESC, then Rating DESC</option>
+        <option value="title-desc-rating-asc">Title DESC, then Rating ASC</option>
+        
+        <option value="rating-asc-title-asc">Rating ASC, then Title ASC</option>
+        <option value="rating-asc-title-desc">Rating ASC, then Title DESC</option>
+    </select>
+    <br>
     <label for="moviesPerPageSelect">Results per page:</label>
     <select id="moviesPerPageSelect">
         <option value="10" selected="selected">10</option>

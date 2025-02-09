@@ -1,23 +1,37 @@
 function createNavbar()
 {
-    document.addEventListener('DOMContentLoaded', () =>
-    {
-        console.log("createNavbar running")
-        const navbar = document.createElement('div');
-        navbar.id = "nav-placeholder";
-        navbar.classList.add("nav-placeholder");
-        document.body.insertAdjacentElement('afterbegin', navbar);
-        fetch("../html/navbar.html")
-            .then(response => response.text())
-            .then(data => {
-                navbar.innerHTML = data;
+    jQuery(document).ready(() => {
+        console.log("createNavbar running");
+        let navbar = $("<div>", { id: "navbar", class: "navbar" });
+        $("body").prepend(navbar);
+
+        // Fetch and insert navbar content
+        $.get("../html/navbar.html")
+            .done((data) => {
+                navbar.html(data);
             })
-            .catch(error => console.error("Error loading navbar:", error));
+            .fail((error) => {
+                console.error("Error loading navbar:", error);
+            });
     });
 }
+
 function backToList()
 {
-    window.location.href = sessionStorage.getItem("lastMovieListURL");
+    let url = sessionStorage.getItem("lastMovieListURL");
+    if (!url)
+    {
+        url = `movie-list.html?title=a&sortBy=rating-desc-title-asc&page=1&moviesPerPage=10`;
+    }
+    window.location.href = url;
+}
+function backToMain()
+{
+    window.location.href = "main-page.html";
+}
+function checkout()
+{
+    window.location.href='shopping-cart.html';
 }
 
 createNavbar();

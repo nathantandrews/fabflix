@@ -15,33 +15,23 @@
 <body>
 <div class="container">
     <div class="card">
-        <h1>Welcome to FabFlix</h1>
+        <h1>Welcome to Fabflix</h1>
         <p>Explore movies and find your next favorite film!</p>
-        <a href="search.html" class="btn btn-primary btn-custom">🔍 Search Movies</a>
-        <a href="browsing.html" class="btn btn-success btn-custom">📚 Browse Categories</a>
-        <button id="logoutButton" class="btn btn-danger btn-custom logout-button" onclick="logout()">🚪 Logout</button>
+        <div class="search-btn">
+            <a href="search.html" class="btn btn-primary btn-custom">🔍 Search Movies</a>
+        </div>
+        <div class="browse-btn">
+            <a href="browsing.html" class="btn btn-success btn-custom">📚 Browse Categories</a>
+        </div>
     </div>
 </div>
 
 
-<!--<script>-->
-
-<!--    document.addEventListener('DOMContentLoaded', () => {-->
-<!--        const checkoutButton = `-->
-<!--        <div class="checkout">-->
-<!--            <button onclick="window.location.href='shopping-cart.html'" class="btn btn-primary">Checkout</button>-->
-<!--        </div>-->
-<!--    `;-->
-<!--        document.body.insertAdjacentHTML('afterbegin', checkoutButton);-->
-<!--    });-->
-<!--</script>-->
-
-
-<script src="../javascript/logout.js"></script>
-
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 
+<script src="../javascript/navbar.js"></script>
+<script src="../javascript/logout.js"></script>
 
 </body>
 </html>

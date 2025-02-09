@@ -1,48 +1,71 @@
-let currentPage = 1;
+let currentPage = sessionStorage.getItem("page") || 1;
 let moviesPerPage = 10; // Default value
 let movieListElement = jQuery("#movie_list");
 let moviesPerPageSelect = jQuery("#moviesPerPageSelect");
 let paginationElement = jQuery("#pagination");
-
-moviesPerPageSelect.val(moviesPerPage);
-moviesPerPageSelect.on("change", function ()
+let sortOptions = jQuery("#sort-options");
+let moviesCache = [];
+let totalMovies = 0;
+let sortBy = sessionStorage.getItem("sortBy") == null ?
+    "rating-desc-title-asc" : sessionStorage.getItem("sortBy");
+sortOptions.val(sortBy);
+sortOptions.on("change", function (event)
+{
+    sortBy = sortOptions.val();
+    sessionStorage.setItem("sortBy", sortBy);
+    if (event.isTrusted)
+    {
+        console.log("isTrusted");
+        currentPage = 1;
+        sessionStorage.setItem("page", currentPage);
+    }
+    fetchMovies();
+});
+moviesPerPageSelect.val(sessionStorage.getItem("moviesPerPage") == null ?
+    10 : sessionStorage.getItem("moviesPerPage"));
+moviesPerPageSelect.on("change", function (event)
 {
     moviesPerPage = parseInt(jQuery(this).val());
-    currentPage = 1;
+    sessionStorage.setItem("moviesPerPage", moviesPerPage);
+    if (event.isTrusted)
+    {
+        currentPage = 1;
+        sessionStorage.setItem("page", currentPage);
+    }
     fetchMovies();
 });
 
 function fetchMovies()
 {
     let params = getQueryParams();
-    params.moviesPerPage = moviesPerPage;
-    params.page = currentPage;
-
+    let url = `movie-list.html${getQueryString(params)}`;
+    sessionStorage.setItem("lastMovieListURL", url);
     $.ajax({
         url: "/api/movie-list",
         method: "GET",
         data: params,
         success: (response) => {
             console.log(response);
-            handleResult(response.movies, response.totalMovies);
+            moviesCache = response["movies"];
+            totalMovies = response["totalMovies"];
+            displayMovies();
         },
         error: (xhr, status, error) => {
             console.error("Error fetching movies:", error);
         }
     });
 }
-
-function handleResult(resultData, totalMovies)
+function displayMovies()
 {
     movieListElement.empty();
 
-    if (resultData.length === 0)
+    if (moviesCache.length === 0)
     {
         movieListElement.append("<p>No movies found.</p>");
         return;
     }
-    console.log(resultData);
-    resultData.forEach((movie) =>
+    console.log(moviesCache);
+    moviesCache.forEach((movie) =>
     {
         let genres = movie.genres.split(',').map(s =>
         {
@@ -70,9 +93,11 @@ function handleResult(resultData, totalMovies)
                 <div><strong>Director:</strong> ${movie.director}</div>
                 <div><strong>Genres:</strong> ${genres.join(", ")}</div>
                 <div><strong>Stars:</strong> ${stars}</div>
-                <div style="color: white; background-color: ${color}; padding: 5px 10px; border-radius: 5px;">
+                <br/>
+                <div style="color: white; background-color: ${color}; padding: 5px 10px; border-radius: 5px; width: 200px; height: 37.6px; align-content: center; margin: 0 auto;">
                     <strong>Rating:</strong> ${movie.rating}
                 </div>
+                <br/>
                 <button class="btn btn-primary add-to-cart" data-title="${movie.title}">Add to Cart</button>
             </div>
         `;
@@ -102,6 +127,7 @@ function paginationControls(totalMovies)
     {
         if (currentPage > 1) {
             currentPage--;
+            sessionStorage.setItem("page", currentPage);
             fetchMovies();
         }
     });
@@ -110,9 +136,25 @@ function paginationControls(totalMovies)
     {
         if (currentPage < totalPages) {
             currentPage++;
+            sessionStorage.setItem("page", currentPage);
             fetchMovies();
         }
     });
+}
+
+function getQueryString(queryParamsDict)
+{
+    let queryParams = [];
+    for (const [key, value] of Object.entries(queryParamsDict))
+    {
+        sessionStorage.setItem(key, value.toString());
+        queryParams.push(`${key}=${encodeURIComponent(value.toString())}`);
+    }
+    if (queryParams.length === 0)
+    {
+        return "";
+    }
+    return queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
 }
 
 function getQueryParams()
@@ -123,7 +165,10 @@ function getQueryParams()
         year: params.get("year") || "",
         director: params.get("director") || "",
         star: params.get("star") || "",
-        genre: params.get("genre") || ""
+        genre: params.get("genre") || "",
+        sortBy: sessionStorage.getItem("sortBy") || params.get("sortBy"),
+        page: sessionStorage.getItem("page") || params.get("page"),
+        moviesPerPage: sessionStorage.getItem("moviesPerPage") || params.get("moviesPerPage")
     };
 }
 
