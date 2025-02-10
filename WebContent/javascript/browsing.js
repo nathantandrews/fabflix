@@ -1,11 +1,11 @@
 let switchBtn = jQuery("#switcher-btn");
+let titleMenu = jQuery("#title-submenu");
+
+
 let switched = false;
 switchBtn.append(`<button class="btn btn-primary" onClick="createBrowseOptions()">Browse by Genre</button>`);
 
-let titleMenu = jQuery("#title-submenu");
-console.log("before creating browse options");
 createBrowseOptions();
-console.log("after creating browse options");
 
 function handleError(resultData)
 {
@@ -20,7 +20,7 @@ function handleResult(resultData)
     let table = `<table class="table table-striped"><tbody><tr>`;
     let itemsPerRow = 5;
     resultData.forEach((genre, index) => {
-        table += `<td><a onclick="searchForMovies('${genre.id}', 'g')">${genre.name}</a></td>`;
+        table += `<td><a onclick="searchMovies('${genre.id}', 'g')">${genre.name}</a></td>`;
         if ((index + 1) % itemsPerRow === 0) {
             table += `</tr><tr>`;
         }
@@ -30,31 +30,39 @@ function handleResult(resultData)
     titleMenu.append(table);
 }
 
-function searchForMovies(filter, type)
+function searchMovies(filter, type)
 {
-    let queryParams = [];
+    let queryParamsDict = {};
     switch (type)
     {
         case 'c':
-            sessionStorage.setItem("title", filter);
-            queryParams.push(`title=${encodeURIComponent(filter)}`);
+            queryParamsDict["title"] = filter;
             break;
         case 'g':
-            sessionStorage.setItem("genre", filter);
-            queryParams.push(`genre=${encodeURIComponent(filter)}`);
+            queryParamsDict["genre"] = filter;
             break;
         default:
             console.warn("Invalid search type:", type);
             break;
     }
-    const page = 1;
-    const sortBy = "rating-desc-title-asc";
-    const moviesPerPage = 10;
-    queryParams.push(`moviesperpage=${encodeURIComponent(moviesPerPage)}`);
-    queryParams.push(`sortby=${encodeURIComponent(sortBy)}`);
-    queryParams.push(`page=${encodeURIComponent(page)}`);
-    const queryString = queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
-    window.location.href = `movie-list.html${queryString}`;
+    getDefaultConstraints(queryParamsDict);
+    let queryParamsSet = new Set(Object.keys(queryParamsDict));
+    let queryParamsList = getSearchKeys().filter(item => !queryParamsSet.has(item));
+    queryParamsList.forEach((elem) => {
+        sessionStorage.removeItem(elem);
+    });
+
+    let queryString = getQueryString(queryParamsDict);
+    console.log("Query String:" + queryString);
+    if (queryString !== "")
+    {
+        sessionStorage.setItem("fromSearchOrBrowse", "true");
+        window.location.href = `movie-list.html${queryString}`;
+    }
+    else
+    {
+        console.error("Empty Query String")
+    }
 }
 
 function createBrowseOptions()
@@ -69,7 +77,7 @@ function createBrowseOptions()
         const itemsPerRow = 10;
         for (let i = 0; i < characters.length; ++i)
         {
-            table += `<td><a onclick="searchForMovies('${characters[i]}', 'c')">${characters[i]}</a></td>`;
+            table += `<td><a onclick="searchMovies('${characters[i]}', 'c')">${characters[i]}</a></td>`;
             if ((i + 1) % itemsPerRow === 0) {
                 table += `</tr><tr>`;
             }
@@ -91,12 +99,3 @@ function createBrowseOptions()
     switched = !switched;
 }
 
-// document.addEventListener('DOMContentLoaded', () =>
-// {
-//     const checkoutButton = `
-//         <div class="checkout">
-//             <button onclick="window.location.href='shopping-cart.html'" class="btn btn-primary">Checkout</button>
-//         </div>
-//     `;
-//     document.body.insertAdjacentHTML('afterbegin', checkoutButton);
-// });

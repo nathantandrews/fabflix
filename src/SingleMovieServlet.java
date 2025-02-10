@@ -60,8 +60,8 @@ public class SingleMovieServlet extends HttpServlet
 
             // Construct a query with parameter represented by "?"
             String query = "SELECT m.id as movieId, m.title, m.year, m.director, " +
-                    "GROUP_CONCAT(DISTINCT g.name ORDER BY g.name SEPARATOR ',') as genres, " +
-                    "GROUP_CONCAT(DISTINCT CONCAT(s.name, ' (', s.id, ')') ORDER BY s.name SEPARATOR ',') as stars, " +
+                    "GROUP_CONCAT(DISTINCT CONCAT(g.name, ' (', g.id, ')') ORDER BY g.name SEPARATOR ',') as genres, " +
+                    "GROUP_CONCAT(DISTINCT CONCAT(s.name, ' (', s.id, ')') ORDER BY sc.movieCount DESC, s.name SEPARATOR ',') as stars, " +
                     "r.rating " +
                     "FROM movies m " +
                     "LEFT JOIN genres_in_movies gim ON m.id = gim.movieId " +
@@ -69,6 +69,9 @@ public class SingleMovieServlet extends HttpServlet
                     "LEFT JOIN stars_in_movies sim ON m.id = sim.movieId " +
                     "LEFT JOIN stars s ON sim.starId = s.id " +
                     "LEFT JOIN ratings r ON m.id = r.movieId " +
+                    "LEFT JOIN (SELECT sim2.starId, COUNT(sim2.movieId) AS movieCount " +
+                    "           FROM stars_in_movies sim2 " +
+                    "           GROUP BY sim2.starId) AS sc ON sc.starId = sim.starId " +
                     "WHERE m.id = ? " +
                     "GROUP BY m.id, m.title, m.year, m.director, r.rating;";
 

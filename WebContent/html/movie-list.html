@@ -42,7 +42,11 @@
         <option value="50">50</option>
         <option value="100">100</option>
     </select>
-    <div id="pagination"></div>
+    <div id="pagination">
+        <button id="prevPage" class="btn btn-secondary" onclick="prevPageClicked()">Previous</button>
+        <span id="totalPages"></span>
+        <button id="nextPage" class="btn btn-secondary" onclick="nextPageClicked()">Next</button>
+    </div>
     <div id="movie_list"></div>
 </div>
 
@@ -52,6 +56,7 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 
 <script src="../javascript/movie-list.js"></script>
+<script src="../javascript/movie-utils.js"></script>
 <script src="../javascript/navbar.js"></script>
 <script src="../javascript/logout.js"></script>
 

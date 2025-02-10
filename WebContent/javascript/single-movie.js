@@ -61,10 +61,20 @@ function handleResult(resultData) {
     `;
     movieInfoElement.append(directorSection);
 
+    let genres = resultData[0]["movie_genre"].split(',').map(g => {
+        let genreId = g.match(/\((.*?)\)/)[1];
+        let queryParamsDict = {};
+        getDefaultConstraints(queryParamsDict);
+        queryParamsDict["genre"] = genreId;
+        sessionStorage.setItem("fromSearchOrBrowse", "true");
+        return `<a href="movie-list.html${getQueryString(queryParamsDict)}">${g.split('(')[0]}</a>`;
+    }).join(", ");
+    sessionStorage.removeItem("genre");
+
     let genresSection = `
         <div class="section">
             <div class="section-title">Genres</div>
-            <div class="section-content">${resultData[0]["movie_genre"].split(',').join(', ')}</div>
+            <div class="section-content">${genres}</div>
         </div>
     `;
     movieInfoElement.append(genresSection);
@@ -98,11 +108,12 @@ function handleResult(resultData) {
 
 
 // This makes the background color for rating. If it's 0, it'll be red, if its 10 it'll be green
-function getColorForRating(rating) {
-    const red = Math.min(255, Math.max(0, Math.floor((1 - rating / 10) * 255)));
-    const green = Math.min(255, Math.max(0, Math.floor((rating / 10) * 255)));
-    return `rgb(${red}, ${green}, 0)`;
+function getColorForRating(rating)
+{
+    let hue = Math.round((rating / 10) * 120); // 0 (red) to 120 (green)
+    return `hsl(${hue}, 100%, 40%)`;
 }
+
 /**
  * Once this .js is loaded, following scripts will be executed by the browser
  */
