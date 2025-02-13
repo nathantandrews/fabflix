@@ -40,29 +40,67 @@ public class LoginServlet extends HttpServlet
         {
             long startTime = System.currentTimeMillis();
 
-            JsonObject responseJsonObject = new JsonObject();
+            JsonObject jsonObj = new JsonObject();
 
+            String gRecaptchaResponse = request.getParameter("g-recaptcha-response");
+            if (gRecaptchaResponse == null || gRecaptchaResponse.isEmpty())
+            {
+                if (request.getSession().getAttribute("gRecaptchaResponse") == null)
+                {
+                    jsonObj.addProperty("status", "fail");
+                    jsonObj.addProperty("message", "Recaptcha verification failed.");
+                    response.getWriter().write(jsonObj.toString());
+                    return;
+                }
+                else
+                {
+                    gRecaptchaResponse = (String) request.getSession().getAttribute("gRecaptchaResponse");
+                }
+            }
+            System.out.println("gRecaptchaResponse=" + gRecaptchaResponse);
+            if (gRecaptchaResponse != null && !gRecaptchaResponse.isEmpty())
+            {
+                request.getSession().setAttribute("gRecaptchaResponse", gRecaptchaResponse);
+                try
+                {
+                    RecaptchaVerifyUtils.verify(gRecaptchaResponse);
+                }
+                catch (Exception e)
+                {
+                    jsonObj.addProperty("status", "fail");
+                    jsonObj.addProperty("message", "Recaptcha verification failed.");
+                    response.getWriter().write(jsonObj.toString());
+                    return;
+                }
+            }
+            else
+            {
+                jsonObj.addProperty("status", "fail");
+                jsonObj.addProperty("message", "Recaptcha verification failed.");
+                response.getWriter().write(jsonObj.toString());
+                return;
+            }
             String email = request.getParameter("email");
             String password = request.getParameter("password");
 //            System.out.println("Email: " + email);
             if (Objects.equals(email, "") && Objects.equals(password, ""))
             {
-                responseJsonObject.addProperty("status", "fail");
-                responseJsonObject.addProperty("message", "Please input your email and password.");
+                jsonObj.addProperty("status", "fail");
+                jsonObj.addProperty("message", "Please input your email and password.");
 
                 System.out.println("Login failed: null email and password");
             }
             else if (Objects.equals(email, ""))
             {
-                responseJsonObject.addProperty("status", "fail");
-                responseJsonObject.addProperty("message", "Please input your email.");
+                jsonObj.addProperty("status", "fail");
+                jsonObj.addProperty("message", "Please input your email.");
 
                 System.out.println("Login failed: null email");
             }
             else if (Objects.equals(password, ""))
             {
-                responseJsonObject.addProperty("status", "fail");
-                responseJsonObject.addProperty("message", "Please input your password.");
+                jsonObj.addProperty("status", "fail");
+                jsonObj.addProperty("message", "Please input your password.");
 
                 System.out.println("Login failed: null password");
             }
@@ -85,15 +123,15 @@ public class LoginServlet extends HttpServlet
                         // set this user into the session
                         request.getSession().setAttribute("user", new User(email));
 
-                        responseJsonObject.addProperty("status", "success");
-                        responseJsonObject.addProperty("message", "login success");
+                        jsonObj.addProperty("status", "success");
+                        jsonObj.addProperty("message", "login success");
                         System.out.println("Login successful: " + email);
                     }
                     else
                     {
                         // Login fail
-                        responseJsonObject.addProperty("status", "fail");
-                        responseJsonObject.addProperty("message", "Invalid login credentials: password");
+                        jsonObj.addProperty("status", "fail");
+                        jsonObj.addProperty("message", "Invalid login credentials: password");
 
                         System.out.println("Login failed: " + email);
                     }
@@ -101,13 +139,13 @@ public class LoginServlet extends HttpServlet
                 else
                 {
                     // Login fail
-                    responseJsonObject.addProperty("status", "fail");
-                    responseJsonObject.addProperty("message", "Invalid login credentials: email");
+                    jsonObj.addProperty("status", "fail");
+                    jsonObj.addProperty("message", "Invalid login credentials: email");
 
                     System.out.println("Login failed: " + email);
                 }
             }
-            response.getWriter().write(responseJsonObject.toString());
+            response.getWriter().write(jsonObj.toString());
             long endTime = System.currentTimeMillis();
             System.out.println("login request took:" + (endTime - startTime) + " ms");
         }

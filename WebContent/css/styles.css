@@ -224,6 +224,12 @@ input.quantity-input {
     justify-content: center;
 }
 
+.recaptcha-container {
+    display: flex;
+    justify-content: center;
+    width: 304px;
+    margin: 0 auto 20px;
+}
 
 /*.btn-logout:focus {*/
 /*    outline:0;*/
