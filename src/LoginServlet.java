@@ -68,8 +68,8 @@ public class LoginServlet extends HttpServlet
             }
             else
             {
-                String emailQuery = "SELECT c.id FROM Customers c WHERE c.email=?";
-                String passwordQuery = "SELECT c.firstName FROM Customers c WHERE c.id = ? AND c.password=?";
+                String emailQuery = "SELECT c.id FROM customers c WHERE c.email=?";
+                String passwordQuery = "SELECT c.firstName FROM customers c WHERE c.id = ? AND c.password=?";
                 PreparedStatement emailStatement = conn.prepareStatement(emailQuery);
                 PreparedStatement passwordStatement = conn.prepareStatement(passwordQuery);
                 emailStatement.setString(1, email);

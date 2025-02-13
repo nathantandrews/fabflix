@@ -53,7 +53,7 @@ public class MovieListServlet extends HttpServlet {
             {
                 sortBy = "rating-desc-title-asc";
             }
-            String currPageString = request.getParameter("currentPage");
+            String currPageString = request.getParameter("page");
             if (currPageString != null && !currPageString.isEmpty())
             {
                 currentPage = Integer.parseInt(currPageString);
