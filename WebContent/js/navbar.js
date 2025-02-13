@@ -5,7 +5,7 @@ function createNavbar()
         $("body").prepend(navbar);
 
         // Fetch and insert navbar content
-        $.get("../html/navbar.html")
+        $.get(window.location.origin + "/Fabflix/pages/navbar.html")
             .done((data) => {
                 navbar.html(data);
             })

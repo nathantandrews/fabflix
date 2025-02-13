@@ -124,14 +124,6 @@ function getColorForRating(rating)
 $.ajax({
     dataType: "json",  // Setting return data type
     method: "GET",// Setting request method
-    url: "/api/single-movie?id=" + getParameterByName('id'), // Setting request url, which is mapped by StarsServlet in Stars.java
+    url: window.location.origin + "/Fabflix/api/single-movie?id=" + getParameterByName('id'), // Setting request url, which is mapped by StarsServlet in Stars.java
     success: (resultData) => handleResult(resultData) // Setting callback function to handle data returned successfully by the SingleStarServlet
 });
-
-$(".add-to-cart").forEach((movie) => {
-    movie.on("click", function()
-    {
-        console.log("add-to-cart clicked")
-        let title = $(this).data("title");
-    });
-})

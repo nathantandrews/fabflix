@@ -16,7 +16,7 @@ function handleLoginResult(resultDataJson)
     // If login succeeds, it will redirect the user to movie-list.html
     if (resultData["status"] === "success")
     {
-        window.location.replace("html/main-page.html");
+        window.location.replace(window.location.origin + "/Fabflix/pages/main-page.html");
     }
     else
     {
@@ -48,7 +48,7 @@ function submitLoginForm(formSubmitEvent)
     formSubmitEvent.preventDefault();
 
     $.ajax({
-        url: "api/login",
+        url: window.location.origin + "/Fabflix/api/login",
         method: "POST",
         // Serialize the login form to the data sent by POST request
         data: login_form.serialize(),

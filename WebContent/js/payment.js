@@ -1,6 +1,6 @@
 function fetchTotalPrice() {
     $.ajax({
-        url: '/api/cart',
+        url: window.location.origin + '/Fabflix/api/cart',
         type: 'GET',
         dataType: 'json',
         success: function(data) {
@@ -35,7 +35,7 @@ $('#paymentForm').on('submit', function(event) {
     };
 
     $.ajax({
-        url: '/api/payment',
+        url: window.location.origin + '/Fabflix/api/payment',
         type: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(requestData),

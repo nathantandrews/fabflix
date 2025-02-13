@@ -3,7 +3,7 @@ function handleLogout(resultData)
     if (resultData.status && resultData.status === "success")
     {
         sessionStorage.removeItem("user");
-        window.location.replace("/index.html");
+        window.location.replace(window.location.origin + "/Fabflix/index.html");
     }
     else
     {
@@ -18,7 +18,7 @@ function handleError(resultData)
 function logout()
 {
     $.ajax({
-        url: "../api/logout",
+        url: window.location.origin + "/Fabflix//api/logout",
         method: 'POST',
         success: handleLogout,
         error: handleError

@@ -21,7 +21,7 @@ function displayError()
 function fetchCart()
 {
     $.ajax({
-        url: '/api/cart',
+        url: window.location.origin + '/Fabflix/api/cart',
         method: 'GET',
         success: function (data)
         {
@@ -66,7 +66,7 @@ function renderCart(cart)
 function updateCart(title, quantity)
 {
     $.ajax({
-        url: "/api/cart",
+        url: window.location.origin + "/Fabflix/api/cart",
         method: "POST",
         data: {
             title: title,

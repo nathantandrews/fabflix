@@ -74,7 +74,7 @@ function fetchMovies()
     let url = `movie-list.html${getQueryString(queryParamsDict)}`;
     sessionStorage.setItem("lastMovieListURL", url);
     $.ajax({
-        url: "/api/movie-list",
+        url: window.location.origin + "/Fabflix/api/movie-list",
         method: "GET",
         data: queryParamsDict,
         success: (response) => {
