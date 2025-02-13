@@ -1,5 +1,5 @@
-let switchBtn = jQuery("#switcher-btn");
-let titleMenu = jQuery("#title-submenu");
+let switchBtn = $("#switcher-btn");
+let titleMenu = $("#title-submenu");
 
 
 let switched = false;
@@ -88,7 +88,7 @@ function createBrowseOptions()
     else
     {
         switchBtn.append(`<button class="btn btn-primary" onClick="createBrowseOptions()">Browse by Title</button>`);
-        jQuery.ajax
+        $.ajax
         ({
             url: "/api/browsing",
             method: "GET",

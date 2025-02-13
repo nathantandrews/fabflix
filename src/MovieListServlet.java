@@ -42,7 +42,7 @@ public class MovieListServlet extends HttpServlet {
         String star = request.getParameter("star");
         String genre = request.getParameter("genre");
 
-        System.out.println("after getting parameters");
+//        System.out.println("after getting parameters");
         String sortBy = "";
         int currentPage = 1;
         int moviesPerPage = 10;
@@ -57,7 +57,7 @@ public class MovieListServlet extends HttpServlet {
             e.printStackTrace();
         }
 
-        System.out.println("after parsing moviesperpage");
+//        System.out.println("after parsing moviesperpage");
 
         String orderByClause = "ORDER BY ";
         switch (sortBy)
@@ -90,7 +90,7 @@ public class MovieListServlet extends HttpServlet {
                 break;
         }
 
-        System.out.println("got to after params");
+//        System.out.println("got to after params");
 
         moviesPerPage = Math.max(1, moviesPerPage);
         int offset = Math.max(0, (currentPage - 1) * moviesPerPage);
@@ -133,7 +133,7 @@ public class MovieListServlet extends HttpServlet {
         }
 
 
-        System.out.println("got to after conditions");
+//        System.out.println("got to after conditions");
 
         StringBuilder countQuery = new StringBuilder(
                 "SELECT COUNT(DISTINCT m.id) AS totalMovies " +
@@ -168,14 +168,14 @@ public class MovieListServlet extends HttpServlet {
             mainQuery.append(whereClause);
         }
 
-        System.out.println("got to after first query build");
+//        System.out.println("got to after first query build");
 
         countQuery.append(";");
         mainQuery.append(" GROUP BY m.id, m.title, m.year, m.director, r.rating ");
         mainQuery.append(orderByClause);
         mainQuery.append(" LIMIT ? OFFSET ?;");
 
-        System.out.println("got to after second query build");
+//        System.out.println("got to after second query build");
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement countPs = conn.prepareStatement(countQuery.toString());
@@ -186,28 +186,28 @@ public class MovieListServlet extends HttpServlet {
                 countPs.setObject(i + 1, parameters.get(i));
             }
 
-            System.out.println("got to after count query params");
+//            System.out.println("got to after count query params");
 
 
-            System.out.println("CountPS: " + countPs.toString());
+//            System.out.println("CountPS: " + countPs.toString());
 
             ResultSet countRs = countPs.executeQuery();
-            System.out.println("got to after executing count query");
+//            System.out.println("got to after executing count query");
             int totalMovies = 0;
             if (countRs.next())
             {
                 totalMovies = countRs.getInt("totalMovies");
             }
 
-            System.out.println("got to after count query results");
+//            System.out.println("got to after count query results");
 
             for (int i = 0; i < parameters.size(); i++)
             {
                 mainPs.setObject(i + 1, parameters.get(i));
             }
-            System.out.println("got to after main query params");
+//            System.out.println("got to after main query params");
 
-            System.out.println("MainPS: " + mainPs.toString());
+//            System.out.println("MainPS: " + mainPs.toString());
 
             mainPs.setInt(parameters.size() + 1, moviesPerPage);
             mainPs.setInt(parameters.size() + 2, offset);

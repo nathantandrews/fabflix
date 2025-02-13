@@ -44,8 +44,7 @@ public class LoginServlet extends HttpServlet
 
             String email = request.getParameter("email");
             String password = request.getParameter("password");
-            System.out.println("Email: " + email);
-            System.out.println("Password: " + password);
+//            System.out.println("Email: " + email);
             if (Objects.equals(email, "") && Objects.equals(password, ""))
             {
                 responseJsonObject.addProperty("status", "fail");

@@ -17,7 +17,7 @@ function handleError(resultData)
 
 function logout()
 {
-    jQuery.ajax({
+    $.ajax({
         url: "../api/logout",
         method: 'POST',
         success: handleLogout,

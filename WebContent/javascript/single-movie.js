@@ -14,7 +14,8 @@
  * @param target String
  * @returns {*}
  */
-function getParameterByName(target) {
+function getParameterByName(target)
+{
     // Get request URL
     let url = window.location.href;
     // Encode target parameter name to url encoding
@@ -35,23 +36,25 @@ function getParameterByName(target) {
  * @param resultData jsonObject
  */
 
-function handleResult(resultData) {
-    console.log("handleResult: populating movie info from resultData");
+function handleResult(resultData)
+{
 
-    let movieInfoElement = jQuery("#movie_info");
-    console.log("Received result:", JSON.stringify(resultData, null, 2));
-
+    let movieInfoElement = $("#movie_info");
+    let addToCartSection = `<button class="btn btn-primary add-to-cart" data-title="${resultData[0]["movie_title"]}">Add to Cart</button>`;
+    movieInfoElement.append(addToCartSection);
     let movieTitleSection = `
         <div class="section">
             <div class="section-title">Title</div>
             <div class="section-content">${resultData[0]["movie_title"]}</div>
-        </div>
+        </div> `;
+    movieInfoElement.append(movieTitleSection);
+    let movieReleaseDateSection = `
         <div class="section">
             <div class="section-title">Release Date</div>
             <div class="section-content">${resultData[0]["movie_year"]}</div>
         </div>
     `;
-    movieInfoElement.append(movieTitleSection);
+    movieInfoElement.append(movieReleaseDateSection);
 
     let directorSection = `
         <div class="section">
@@ -118,10 +121,17 @@ function getColorForRating(rating)
  * Once this .js is loaded, following scripts will be executed by the browser
  */
 // Makes the HTTP GET request and registers on success callback function handleResult
-jQuery.ajax({
+$.ajax({
     dataType: "json",  // Setting return data type
     method: "GET",// Setting request method
     url: "/api/single-movie?id=" + getParameterByName('id'), // Setting request url, which is mapped by StarsServlet in Stars.java
     success: (resultData) => handleResult(resultData) // Setting callback function to handle data returned successfully by the SingleStarServlet
 });
 
+$(".add-to-cart").forEach((movie) => {
+    movie.on("click", function()
+    {
+        console.log("add-to-cart clicked")
+        let title = $(this).data("title");
+    });
+})

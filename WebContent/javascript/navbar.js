@@ -1,7 +1,6 @@
 function createNavbar()
 {
-    jQuery(document).ready(() => {
-        console.log("createNavbar running");
+    $(document).ready(() => {
         let navbar = $("<div>", { id: "navbar", class: "navbar" });
         $("body").prepend(navbar);
 
@@ -26,10 +25,12 @@ function backToList()
     }
     window.location.href = url;
 }
+
 function backToMain()
 {
     window.location.href = "main-page.html";
 }
+
 function checkout()
 {
     window.location.href='shopping-cart.html';

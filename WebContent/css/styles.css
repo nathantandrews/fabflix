@@ -34,7 +34,7 @@ table {
 }
 
 th, td {
-    text-align: left;
+    text-align: center;
     padding: 10px;
     border-bottom: 1px solid #ddd;
 }
@@ -43,10 +43,10 @@ th {
     background-color: #007bff;
     color: white;
 }
-label {
+.login-label {
     font-size: x-large;
 }
-input {
+.login-input {
     font-size: x-large;
     display: flex;
     justify-content: center;
@@ -94,12 +94,6 @@ input {
 
 .login-box {
     margin: auto;
-    padding: 100px;
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    display: flex;
-    justify-content: center;
 }
 
 .container {
@@ -189,6 +183,46 @@ input {
     text-decoration: underline;
 }
 
+/*th, td {*/
+/*    padding: 10px;*/
+/*    border: 1px solid #ddd;*/
+/*    text-align: center;*/
+/*}*/
+
+.total {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+input.quantity-input {
+    width: 50px;
+    text-align: center;
+}
+/*.input-group {*/
+/*    margin: 0 auto;*/
+/*}*/
+.total-price-container {
+    margin: auto;
+    width: auto;
+}
+
+.payment-form {
+    /*margin: auto;*/
+    padding: 100px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: center;
+}
+.form-container {
+    margin: auto;
+    padding: 100px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: center;
+}
 
 
 /*.btn-logout:focus {*/

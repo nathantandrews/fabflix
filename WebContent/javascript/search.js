@@ -29,7 +29,7 @@ function getFormResults(queryParamsDict)
     if (!title && !year && !director && !star)
     {
         console.log("show error message");
-        jQuery("#search_error_message").text("Please input a title, year, director, or star");
+        $("#search_error_message").text("Please input a title, year, director, or star");
         return false;
     }
     if (title && title.length !== 0)

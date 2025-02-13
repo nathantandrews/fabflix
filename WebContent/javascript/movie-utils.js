@@ -34,3 +34,32 @@ function getSearchKeys()
         "genre"
     ];
 }
+
+function addToCart(title)
+{
+    $.ajax({
+        url: "/api/cart",
+        method: "POST",
+        data: {
+            title: title,
+            action: "add",
+            quantity: 1
+        },
+        success: () => {
+            console.log(`Added ${title} to cart!`);
+            alert(`Added ${title} to cart!`);
+        },
+        error: (xhr, status, error) => {
+            console.error("Error adding movie to cart: ", error);
+        }
+    });
+}
+
+document.addEventListener("click", function (event)
+{
+    if (event.target.classList.contains("add-to-cart"))
+    {
+        const movieTitle = event.target.getAttribute("data-title");
+        addToCart(movieTitle);
+    }
+});

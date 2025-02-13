@@ -2,38 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shopping Cart</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: center;
-        }
-        .btn {
-            cursor: pointer;
-            padding: 5px 10px;
-            margin: 5px;
-        }
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-        .btn-primary {
-            background-color: blue;
-            color: white;
-        }
-        .total {
-            font-weight: bold;
-            font-size: 1.2em;
-        }
-        input.quantity-input {
-            width: 50px;
-            text-align: center;
-        }
-    </style>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="shortcut icon" href="../images/favicon.ico">
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <title>Fabflix - Shopping Cart</title>
 </head>
 <body>
 <h1>Shopping Cart</h1>
@@ -52,85 +30,12 @@
 <div class="total">
     <p>Total Price: $<span id="totalPrice">0.00</span></p>
 </div>
-<button onclick="proceedToPayment()">Proceed to Payment</button>
-<script>
-    function fetchCart() {
-        $.ajax({
-            url: 'api/index',
-            method: 'GET',
-            success: function (data) {
-                renderCart(data.cart || []);
-            },
-            error: function (xhr, status, error) {
-                console.error("Error fetching cart:", error);
-            }
-        });
-    }
-
-    function renderCart(cart) {
-        let cartBody = $("#cartBody");
-        cartBody.empty();
-        let totalPrice = 0;
-
-        cart.forEach(item => {
-            let price = item.cost;
-            totalPrice += price * item.quantity;
-
-            let row = `
-                <tr>
-                    <td>${item.title}</td>
-                    <td>
-                        <input type="number" class="quantity-input" min="0" value="${item.quantity}" data-title="${item.title}">
-                    </td>
-                    <td>$${(price * item.quantity).toFixed(2)}</td>
-                    <td>
-                        <button class="btn btn-primary update-btn" data-title="${item.title}">Update</button>
-                    </td>
-                </tr>
-            `;
-            cartBody.append(row);
-        });
-
-        $("#totalPrice").text(totalPrice.toFixed(2));
-    }
-
-
-    $(document).on("click", ".update-btn", function () {
-        let title = $(this).data("title");
-        let quantity = $(this).closest("tr").find(".quantity-input").val();
-        quantity = parseInt(quantity);
-
-        if (isNaN(quantity) || quantity < 0) {
-            alert("Invalid quantity");
-            return;
-        }
-
-        updateCart(title, quantity);
-    });
-
-    function updateCart(title, quantity) {
-        $.ajax({
-            url: "api/index",
-            method: "POST",
-            data: {
-                item: title,
-                quantity: quantity,
-                action: quantity === 0 ? "remove" : "update"
-            },
-            success: function () {
-                fetchCart();
-            },
-            error: function (xhr, status, error) {
-                console.error("Error updating cart:", error);
-            }
-        });
-    }
-
-    function proceedToPayment() {
-        window.location.href = 'payment.html';
-    }
-
-    $(document).ready(fetchCart);
-</script>
+<button class="btn btn-primary btn-custom" onclick="proceedToPayment()">Proceed to Payment</button>
+<div id="empty-error-message"></div>
 </body>
+
+<script src="../javascript/shopping-cart.js"></script>
+<script src="../javascript/navbar.js"></script>
+<script src="../javascript/logout.js"></script>
+
 </html>

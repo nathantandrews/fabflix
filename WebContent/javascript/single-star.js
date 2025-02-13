@@ -25,7 +25,7 @@ function getParameterByName(target) {
 function handleResult(resultData) {
     console.log("handleResult: Populating star and movie details");
 
-    let starInfoElement = jQuery("#star_info");
+    let starInfoElement = $("#star_info");
     starInfoElement.append(`
         <div class="section-title">Star Name</div>
         <div class="section-content">${resultData[0]["star_name"]}</div>
@@ -33,7 +33,7 @@ function handleResult(resultData) {
         <div class="section-content">${resultData[0]["star_dob"] || 'N/A'}</div>
     `);
 
-    let movieTableBodyElement = jQuery("#movie_table_body");
+    let movieTableBodyElement = $("#movie_table_body");
 
     for (let i = 0; i < resultData.length; i++) {
         let rowHTML = `
@@ -48,7 +48,7 @@ function handleResult(resultData) {
 }
 
 let starId = getParameterByName('id');
-jQuery.ajax({
+$.ajax({
     dataType: "json",
     method: "GET",
     url: "/api/single-star?id=" + starId,

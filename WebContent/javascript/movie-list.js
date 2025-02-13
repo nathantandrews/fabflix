@@ -1,7 +1,6 @@
-// Set jQuery elements
-let movieListElement = jQuery("#movie_list");
-let moviesPerPageSelect = jQuery("#moviesPerPageSelect");
-let sortOptions = jQuery("#sort-options");
+let movieListElement = $("#movie_list");
+let moviesPerPageSelect = $("#moviesPerPageSelect");
+let sortOptions = $("#sort-options");
 
 let totalMovies = 0;
 let totalPages = 0;
@@ -26,17 +25,13 @@ if (sortBy == null)
     sortBy = "rating-desc-title-asc";
 }
 
-// set the selected sortOptions
 sortOptions.val(sortBy);
-
-// On change in the sort options, set sortBy to new option
-// save it to the session
 sortOptions.on("change", function (event)
 {
     if (event.originalEvent !== undefined)
     {
         console.log("User triggered sort change");
-        sessionStorage.setItem("sortBy", jQuery(this).val());
+        sessionStorage.setItem("sortBy", $(this).val());
         currentPage = 1;
         sessionStorage.setItem("page", currentPage);
         fetchMovies();
@@ -47,14 +42,13 @@ sortOptions.on("change", function (event)
     }
 });
 
-
 moviesPerPageSelect.val(moviesPerPage);
 moviesPerPageSelect.on("change", function (event)
 {
     if (event.originalEvent !== undefined)
     {
         console.log("User triggered sort change");
-        moviesPerPage = parseInt(jQuery(this).val());
+        moviesPerPage = parseInt($(this).val());
         sessionStorage.setItem("moviesPerPage", moviesPerPage);
         currentPage = 1;
         sessionStorage.setItem("page", currentPage);
@@ -78,7 +72,6 @@ function fetchMovies()
     let queryParamsDict = {};
     getQueryParams(queryParamsDict);
     let url = `movie-list.html${getQueryString(queryParamsDict)}`;
-    console.log(url);
     sessionStorage.setItem("lastMovieListURL", url);
     $.ajax({
         url: "/api/movie-list",
@@ -126,10 +119,18 @@ function displayMovies(movies)
                 <h3 class="movie-title">
                     <a href="single-movie.html?id=${movie.id}">${movie.title}</a>
                 </h3>
-                <div><strong>Year:</strong> ${movie.year}</div>
-                <div><strong>Director:</strong> ${movie.director}</div>
-                <div><strong>Genres:</strong> ${genres}</div>
-                <div><strong>Stars:</strong> ${starsList}</div>
+                <div>
+                    <strong>Year:</strong> ${movie.year}
+                </div>
+                <div>
+                    <strong>Director:</strong> ${movie.director}
+                </div>
+                <div>
+                <strong>Genres:</strong> ${genres}
+                </div>
+                <div>
+                <strong>Stars:</strong> ${starsList}
+                </div>
                 <br/>
                 <div style="color: white; background-color: ${color}; padding: 5px 10px; border-radius: 5px; width: 200px; height: 37.6px; align-content: center; margin: 0 auto;">
                     <strong>Rating:</strong> ${movie.rating}
@@ -147,10 +148,10 @@ function displayMovies(movies)
 function paginationControls()
 {
     totalPages = Math.ceil(totalMovies / moviesPerPage);
-    let totalPagesSpan = jQuery("#totalPages");
+    let totalPagesSpan = $("#totalPages");
     totalPagesSpan.text(`Page ${currentPage} of ${totalPages}`);
-    let prevPage = jQuery("#prevPage");
-    let nextPage = jQuery("#nextPage");
+    let prevPage = $("#prevPage");
+    let nextPage = $("#nextPage");
     prevPage.prop("disabled", currentPage === 1);
     nextPage.prop("disabled", currentPage === totalPages);
 }
@@ -244,49 +245,3 @@ function getColorForRating(rating)
     let hue = Math.round((rating / 10) * 120);
     return `hsl(${hue}, 100%, 40%)`;
 }
-
-
-// jQuery(document).on("click", ".add-to-cart", function()
-// {
-//     let title = jQuery(this).data("title");
-//     showModal(title);
-// });
-//
-// function showModal(title)
-// {
-//     jQuery("#quantityModal").data("movieTitle", title);
-//     jQuery("#quantityModal").modal("show");
-// }
-//
-// jQuery("#submitQuantity").on("click", function()
-// {
-//     let title = jQuery("#quantityModal").data("movieTitle");
-//     let quantity = jQuery("#quantityInput").val();
-//
-//     if (quantity < 1) {
-//         alert("Quantity must be at least 1");
-//     } else {
-//         addToCart(title, quantity);
-//     }
-// });
-//
-// function addToCart(title, quantity)
-// {
-//     $.ajax({
-//         url: "api/index",
-//         method: "POST",
-//         data:
-//             {
-//                 item: title,
-//                 quantity: quantity,
-//                 action: "add"
-//             },
-//         success: () => {
-//             alert(`Added ${quantity} of ${title} to cart!`);
-//             jQuery("#quantityModal").modal("hide");
-//         },
-//         error: (xhr, status, error) => {
-//             console.error("Error adding movie to cart:", error);
-//         }
-//     });
-// }
