@@ -1,6 +1,11 @@
-## CS 122B Project 3
-DEMO YOUTUBE LINK: 
+## CS 122B Project 1
+DEMO YOUTUBE LINK: https://youtu.be/zvZVLuhrNqg
 
 Contributions:
 
-    Everything - Nathan
+    Demo - Nathan
+    SQL Query Optimizations - Nathan,
+    Javascript + HTML - Santiago,
+    MovieListServlet - Nathan,
+    SingleMovieServlet - Santiago
+    SingleStarServlet - Santiago
