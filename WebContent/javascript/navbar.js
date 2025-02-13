@@ -17,7 +17,7 @@ function createNavbar()
 
 function backToList()
 {
-    sessionStorage.setItem("fromSearchOrBrowse", "false");
+    sessionStorage.setItem("fromSearchOrBrowse", "true");
     let url = sessionStorage.getItem("lastMovieListURL");
     if (!url)
     {

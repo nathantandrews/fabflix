@@ -48,9 +48,21 @@ public class MovieListServlet extends HttpServlet {
         int moviesPerPage = 10;
         try
         {
-            sortBy = request.getParameter("sortBy") != null ? request.getParameter("sortBy") : "rating-desc-title-asc";
-            currentPage = request.getParameter("page") != null ? Integer.parseInt(request.getParameter("page")) : 1;
-            moviesPerPage = request.getParameter("moviesPerPage") != null ? Integer.parseInt(request.getParameter("moviesPerPage")) : 10;
+            sortBy = request.getParameter("sortBy");
+            if (sortBy == null || sortBy.isEmpty())
+            {
+                sortBy = "rating-desc-title-asc";
+            }
+            String currPageString = request.getParameter("currentPage");
+            if (currPageString != null && !currPageString.isEmpty())
+            {
+                currentPage = Integer.parseInt(currPageString);
+            }
+            String moviesPerPageString = request.getParameter("moviesPerPage");
+            if (moviesPerPageString != null && !moviesPerPageString.isEmpty())
+            {
+                moviesPerPage =  Integer.parseInt(moviesPerPageString);
+            }
         }
         catch (Exception e)
         {
@@ -207,12 +219,10 @@ public class MovieListServlet extends HttpServlet {
             }
 //            System.out.println("got to after main query params");
 
-//            System.out.println("MainPS: " + mainPs.toString());
-
             mainPs.setInt(parameters.size() + 1, moviesPerPage);
             mainPs.setInt(parameters.size() + 2, offset);
 
-
+//            System.out.println("MainPS: " + mainPs.toString());
             ResultSet rs = mainPs.executeQuery();
 
             JsonWriter jsonWriter = new JsonWriter(response.getWriter());
