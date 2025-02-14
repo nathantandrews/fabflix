@@ -88,9 +88,11 @@ function createBrowseOptions()
     else
     {
         switchBtn.append(`<button class="btn btn-primary" onClick="createBrowseOptions()">Browse by Title</button>`);
+        let url = window.location.origin + "/fabflix/api/browsing";
+        console.log("fetching genres: " + url);
         $.ajax
         ({
-            url: window.location.origin + "/Fabflix/api/browsing",
+            url: url,
             method: "GET",
             success: (resultData) => handleResult(resultData),
             error: (resultData) => handleError(resultData)

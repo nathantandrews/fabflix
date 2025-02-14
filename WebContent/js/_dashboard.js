@@ -10,15 +10,12 @@ function handleLoginResult(resultDataJson)
     console.log(resultData);
     console.log(resultData["status"]);
 
-    // If login succeeds, it will redirect the user to movie-list.html
+    // If login succeeds, it will redirect the user to editor.html
     if (resultData["status"] === "success")
     {
-        sessionStorage.setItem("fromSearchOrBrowse", "false");
-        sessionStorage.setItem("title", "A");
-        sessionStorage.setItem("moviesPerPage", "10");
-        sessionStorage.setItem("page", "1");
-        sessionStorage.setItem("sortBy", "rating-desc-title-asc");
-        window.location.replace(window.location.origin + "/fabflix/pages/main-page.html");
+        let url = window.location.origin + "/fabflix/pages/editor";
+        console.log(url);
+        window.location.replace(url);
     }
     else
     {
@@ -33,10 +30,10 @@ function handleError(resultData)
     console.log("Error: " + resultData)
 }
 
-function submitLoginForm(formSubmitEvent) 
+function submitLoginForm(formSubmitEvent)
 {
     formSubmitEvent.preventDefault();
-    let newURL = window.location.origin + "/fabflix/api/login";
+    let newURL = window.location.origin + "/fabflix/api/_dashboard";
     $.ajax({
         url: newURL,
         method: "POST",

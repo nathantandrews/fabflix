@@ -5,7 +5,9 @@ function createNavbar()
         $("body").prepend(navbar);
 
         // Fetch and insert navbar content
-        $.get(window.location.origin + "/Fabflix/pages/navbar.html")
+        let url = window.location.origin + "/fabflix/pages/navbar.html"
+        console.log("fetching " + url);
+        $.get(url)
             .done((data) => {
                 navbar.html(data);
             })
@@ -17,7 +19,6 @@ function createNavbar()
 
 function backToList()
 {
-    sessionStorage.setItem("fromSearchOrBrowse", "true");
     let url = sessionStorage.getItem("lastMovieListURL");
     if (!url)
     {

@@ -7,22 +7,29 @@ let totalPages = 0;
 
 // Grab session constraints
 let currentPage = sessionStorage.getItem("page");
+console.log("currentPage updated from session: " + currentPage);
 if (currentPage == null)
 {
     currentPage = 1;
 }
 currentPage = parseInt(currentPage);
+console.log("currentPage parsed as int: " + currentPage);
 let moviesPerPage = sessionStorage.getItem("moviesPerPage");
+console.log("moviesPerPage updated from session: " + moviesPerPage);
 if (moviesPerPage == null)
 {
     moviesPerPage = 10;
+    console.log("moviesPerPage updated to default: " + moviesPerPage);
 }
 moviesPerPage = parseInt(moviesPerPage);
+console.log("moviesPerPage parsed as int: " + moviesPerPage);
 
 let sortBy = sessionStorage.getItem("sortBy");
+console.log("sortBy updated from session: " + sortBy);
 if (sortBy == null)
 {
     sortBy = "rating-desc-title-asc";
+    console.log("sortBy updated to default: " + sortBy);
 }
 
 sortOptions.val(sortBy);
@@ -30,10 +37,14 @@ sortOptions.on("change", function (event)
 {
     if (event.originalEvent !== undefined)
     {
+        sessionStorage.setItem("fromSearchOrBrowse", "false");
         console.log("User triggered sort change");
         sessionStorage.setItem("sortBy", $(this).val());
+        console.log("sortBy added to session: " + $(this).val());
         currentPage = 1;
-        sessionStorage.setItem("page", currentPage);
+        console.log("currentPage updated to default: 1");
+        sessionStorage.setItem("page", "1");
+        console.log("page added to session (set back to default): 1");
         fetchMovies();
     }
     else
@@ -42,16 +53,22 @@ sortOptions.on("change", function (event)
     }
 });
 
+console.log("Select showing moviesPerPage: " + moviesPerPage);
 moviesPerPageSelect.val(moviesPerPage);
 moviesPerPageSelect.on("change", function (event)
 {
     if (event.originalEvent !== undefined)
     {
+        sessionStorage.setItem("fromSearchOrBrowse", "false");
         console.log("User triggered sort change");
         moviesPerPage = parseInt($(this).val());
+        console.log("moviesPerPage parsed to int: " + moviesPerPage);
         sessionStorage.setItem("moviesPerPage", moviesPerPage);
+        console.log("moviesPerPage added to session: " + moviesPerPage);
         currentPage = 1;
-        sessionStorage.setItem("page", currentPage);
+        console.log("currentPage updated to default: 1");
+        sessionStorage.setItem("page", "1");
+        console.log("page added to session (set back to default): 1");
         fetchMovies();
     }
     else
@@ -71,10 +88,11 @@ function fetchMovies()
 {
     let queryParamsDict = {};
     getQueryParams(queryParamsDict);
-    let url = `movie-list.html${getQueryString(queryParamsDict)}`;
-    sessionStorage.setItem("lastMovieListURL", url);
+    let lastURL = `movie-list.html${getQueryString(queryParamsDict)}`;
+    sessionStorage.setItem("lastMovieListURL", lastURL);
+    let url = window.location.origin + "/fabflix/api/movie-list"
     $.ajax({
-        url: window.location.origin + "/Fabflix/api/movie-list",
+        url: url,
         method: "GET",
         data: queryParamsDict,
         success: (response) => {
@@ -102,8 +120,7 @@ function displayMovies(movies)
             let queryParamsDict = {};
             getDefaultConstraints(queryParamsDict);
             queryParamsDict["genre"] = genreId;
-            sessionStorage.setItem("fromSearchOrBrowse", "true");
-            return `<a href="movie-list.html${getQueryString(queryParamsDict)}">${g.split('(')[0]}</a>`;
+            return `<a onclick="sessionStorage.setItem('fromSearchOrBrowse', 'true');" href="movie-list.html${getQueryString(queryParamsDict)}">${g.split('(')[0]}</a>`;
         }).slice(0,3).join(", ");
         sessionStorage.removeItem("genre");
 
@@ -162,7 +179,9 @@ function prevPageClicked()
     {
         currentPage--;
         sessionStorage.setItem("fromSearchOrBrowse", "false");
+        console.log("fromSearchOrBrowse added to session: false");
         sessionStorage.setItem("page", currentPage);
+        console.log("page added to session: " + currentPage);
         fetchMovies();
     }
 }
@@ -173,27 +192,12 @@ function nextPageClicked()
     {
         currentPage++;
         sessionStorage.setItem("fromSearchOrBrowse", "false");
+        console.log("fromSearchOrBrowse added to session: false");
         sessionStorage.setItem("page", currentPage);
+        console.log("page added to session: " + currentPage);
         fetchMovies();
     }
 }
-
-// function getQueryString(queryParamsDict)
-// {
-//     let queryParams = [];
-//     for (const [key, value] of Object.entries(queryParamsDict))
-//     {
-//         if (value !== null && value !== sessionStorage.getItem(key))
-//         {
-//             sessionStorage.setItem(key, value.toString());
-//         }
-//         if (value !== null)
-//         {
-//             queryParams.push(`${key}=${encodeURIComponent(value.toString())}`);
-//         }
-//     }
-//     return queryParams.length ? `?${queryParams.join("&")}` : "";
-// }
 
 function getQueryParams(queryParamsDict)
 {

@@ -38,7 +38,7 @@ public class LoginFilter implements Filter
         if (httpRequest.getSession().getAttribute("user") == null)
         {
             System.out.println("LoginFilter blocking: " + httpRequest.getRequestURI());
-            httpResponse.sendRedirect(this.contextPath + "/index.html");
+            httpResponse.sendRedirect(this.contextPath);
         }
         else
         {
@@ -54,20 +54,22 @@ public class LoginFilter implements Filter
          You might also want to allow some CSS files, etc...
          */
         String fullURIString = requestURI.toLowerCase();
-//        System.out.println("isUrlAllowedWithoutLogin: " + fullURIString);
+        System.out.println("isUrlAllowedWithoutLogin: " + fullURIString);
         String partialURIString = fullURIString.replaceFirst(this.contextPath.toLowerCase() + "/", "");
-//        System.out.println("partialURIString: " + partialURIString);
+        System.out.println("partialURIString: " + partialURIString);
         return allowedURIs.stream().anyMatch(partialURIString::equals);
     }
 
     public void init(FilterConfig fConfig)
     {
         allowedURIs.add("");
-        allowedURIs.add("index.html");
+        allowedURIs.add("_dashboard");
         allowedURIs.add("js/login.js");
+        allowedURIs.add("js/_dashboard.js");
+        allowedURIs.add("images/favicon.ico");
         allowedURIs.add("css/styles.css");
         allowedURIs.add("api/login");
-        allowedURIs.add("images/favicon.ico");
+        allowedURIs.add("api/_dashboard");
     }
 
     public void destroy()

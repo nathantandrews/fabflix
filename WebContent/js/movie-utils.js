@@ -37,8 +37,9 @@ function getSearchKeys()
 
 function addToCart(title)
 {
+    let url = window.location.origin + "/fabflix/api/cart";
     $.ajax({
-        url: window.location.origin + "/Fabflix/api/cart",
+        url: url,
         method: "POST",
         data: {
             title: title,

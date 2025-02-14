@@ -124,6 +124,6 @@ function getColorForRating(rating)
 $.ajax({
     dataType: "json",  // Setting return data type
     method: "GET",// Setting request method
-    url: window.location.origin + "/Fabflix/api/single-movie?id=" + getParameterByName('id'), // Setting request url, which is mapped by StarsServlet in Stars.java
+    url: window.location.origin + "/fabflix/api/single-movie?id=" + getParameterByName('id'), // Setting request url, which is mapped by StarsServlet in Stars.java
     success: (resultData) => handleResult(resultData) // Setting callback function to handle data returned successfully by the SingleStarServlet
 });

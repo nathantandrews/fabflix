@@ -3,7 +3,7 @@ function handleLogout(resultData)
     if (resultData.status && resultData.status === "success")
     {
         sessionStorage.clear();
-        let url = window.location.origin + "/fabflix/";
+        let url = window.location.origin + "/fabflix/_dashboard";
         window.location.replace(url);
     }
     else
@@ -11,6 +11,7 @@ function handleLogout(resultData)
         console.error("Logout failed: Unexpected response", resultData)
     }
 }
+
 function handleError(resultData)
 {
     console.error("Logout failed:", resultData);

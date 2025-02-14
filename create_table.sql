@@ -84,6 +84,14 @@ CREATE TABLE ratings
     numVotes int NOT NULL,
     FOREIGN KEY (movieId) REFERENCES movies(id)
 );
+CREATE TABLE employees
+(
+    email varchar(50) primary key,
+    password varchar(20) not null,
+    fullname varchar(100)
+);
+
+
 CREATE INDEX idx_movie_ratings ON ratings(rating DESC);
 CREATE INDEX idx_movie_title ON movies(title);
 CREATE INDEX idx_movie_director ON movies(director);

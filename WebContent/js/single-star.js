@@ -51,7 +51,7 @@ let starId = getParameterByName('id');
 $.ajax({
     dataType: "json",
     method: "GET",
-    url: window.location.origin + "/Fabflix/api/single-star?id=" + starId,
+    url: window.location.origin + "/fabflix/api/single-star?id=" + starId,
     success: (resultData) => handleResult(resultData),
 });
 

@@ -17,6 +17,8 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.Integer.parseInt;
+
 @WebServlet(name = "MovieListServlet", urlPatterns = "/api/movie-list")
 public class MovieListServlet extends HttpServlet {
     private static final long serialVersionUID = 2L;
@@ -30,7 +32,7 @@ public class MovieListServlet extends HttpServlet {
         }
     }
 
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException
     {
         long startTime = System.currentTimeMillis();
 
@@ -42,34 +44,9 @@ public class MovieListServlet extends HttpServlet {
         String star = request.getParameter("star");
         String genre = request.getParameter("genre");
 
-//        System.out.println("after getting parameters");
-        String sortBy = "";
-        int currentPage = 1;
-        int moviesPerPage = 10;
-        try
-        {
-            sortBy = request.getParameter("sortBy");
-            if (sortBy == null || sortBy.isEmpty())
-            {
-                sortBy = "rating-desc-title-asc";
-            }
-            String currPageString = request.getParameter("page");
-            if (currPageString != null && !currPageString.isEmpty())
-            {
-                currentPage = Integer.parseInt(currPageString);
-            }
-            String moviesPerPageString = request.getParameter("moviesPerPage");
-            if (moviesPerPageString != null && !moviesPerPageString.isEmpty())
-            {
-                moviesPerPage =  Integer.parseInt(moviesPerPageString);
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-//        System.out.println("after parsing moviesperpage");
+        String sortBy = request.getParameter("sortBy");
+        int currentPage = parseInt(request.getParameter("page"));
+        int moviesPerPage = parseInt(request.getParameter("moviesPerPage"));
 
         String orderByClause = "ORDER BY ";
         switch (sortBy)
@@ -97,9 +74,9 @@ public class MovieListServlet extends HttpServlet {
                 break;
             case "rating-desc-title-asc":
                 orderByClause += "r.rating DESC, m.title ASC";
-            default:
-                orderByClause += "";
                 break;
+            default:
+                throw new IOException("sortBy invalid");
         }
 
 //        System.out.println("got to after params");
