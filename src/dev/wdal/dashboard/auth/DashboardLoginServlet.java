@@ -1,6 +1,7 @@
 package dev.wdal.dashboard.auth;
 
 import dev.wdal.main.auth.User;
+import dev.wdal.main.auth.RecaptchaConstants;
 import dev.wdal.main.auth.RecaptchaVerifyUtils;
 import com.google.gson.JsonObject;
 import jakarta.servlet.ServletConfig;
@@ -118,13 +119,12 @@ public class DashboardLoginServlet extends HttpServlet
                 ResultSet emailRs = emailStatement.executeQuery();
                 if (emailRs.next())
                 {
-                    boolean success;
                     passwordStatement.setString(1, emailRs.getString("fullname"));
                     ResultSet passwordRs = passwordStatement.executeQuery();
                     if (passwordRs.next())
                     {
                         String encryptedPassword = passwordRs.getString("password");
-                        success = new StrongPasswordEncryptor().checkPassword(password, encryptedPassword);
+                        boolean success = password.equals(encryptedPassword);
                         if (success)
                         {
                             // Login success:
