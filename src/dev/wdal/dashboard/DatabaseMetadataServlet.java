@@ -1,3 +1,5 @@
+package dev.wdal.dashboard;
+
 import com.google.gson.stream.JsonWriter;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -12,7 +14,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-@WebServlet(name = "DatabaseMetadataServlet", urlPatterns = "/api/metadata")
+@WebServlet(name = "DatabaseMetadataServlet", urlPatterns = "/_dashboard/api/metadata")
 public class DatabaseMetadataServlet extends HttpServlet
 {
     private DataSource dataSource;

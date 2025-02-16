@@ -3,7 +3,7 @@ function handleLogout(resultData)
     if (resultData.status && resultData.status === "success")
     {
         sessionStorage.clear();
-        let url = window.location.origin + "/fabflix/_dashboard";
+        let url = window.location.origin + "/fabflix/_dashboard/";
         window.location.replace(url);
     }
     else
@@ -19,7 +19,7 @@ function handleError(resultData)
 
 function logout()
 {
-    let url = window.location.origin + "/fabflix/api/logout";
+    let url = window.location.origin + "/fabflix/api/logout"; // uses main shared logout servlet
     $.ajax({
         url: url,
         method: 'POST',

@@ -1,5 +1,6 @@
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+package dev.wdal.main;
+
+import com.google.gson.stream.JsonWriter;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -10,14 +11,13 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-// Declaring a WebServlet called SingleStarServlet, which maps to url "/api/single-star"
-@WebServlet(name = "SingleStarServlet", urlPatterns = "/api/single-star")
-public class SingleStarServlet extends HttpServlet
+// Declaring a WebServlet called SingleMovieServlet, which maps to url "/api/single-movie"
+@WebServlet(name = "SingleMovieServlet", urlPatterns = "/api/single-movie")
+public class SingleMovieServlet extends HttpServlet
 {
     private static final long serialVersionUID = 2L;
 
@@ -53,7 +53,7 @@ public class SingleStarServlet extends HttpServlet
         request.getServletContext().log("getting id: " + id);
 
         // Output stream to STDOUT
-        PrintWriter out = response.getWriter();
+        JsonWriter out = new JsonWriter(response.getWriter());
 
         // Get a connection from dataSource and let resource manager close the connection after usage.
         try (Connection conn = dataSource.getConnection())
@@ -61,8 +61,21 @@ public class SingleStarServlet extends HttpServlet
             // Get a connection from dataSource
 
             // Construct a query with parameter represented by "?"
-            String query = "SELECT * from stars as s, stars_in_movies as sim, movies as m " +
-                    "where m.id = sim.movieId and sim.starId = s.id and s.id = ?";
+            String query = "SELECT m.id as movieId, m.title, m.year, m.director, " +
+                    "GROUP_CONCAT(DISTINCT CONCAT(g.name, ' (', g.id, ')') ORDER BY g.name SEPARATOR ',') as genres, " +
+                    "GROUP_CONCAT(DISTINCT CONCAT(s.name, ' (', s.id, ')') ORDER BY sc.movieCount DESC, s.name SEPARATOR ',') as stars, " +
+                    "r.rating " +
+                    "FROM movies m " +
+                    "LEFT JOIN genres_in_movies gim ON m.id = gim.movieId " +
+                    "LEFT JOIN genres g ON gim.genreId = g.id " +
+                    "LEFT JOIN stars_in_movies sim ON m.id = sim.movieId " +
+                    "LEFT JOIN stars s ON sim.starId = s.id " +
+                    "LEFT JOIN ratings r ON m.id = r.movieId " +
+                    "LEFT JOIN (SELECT sim2.starId, COUNT(sim2.movieId) AS movieCount " +
+                    "           FROM stars_in_movies sim2 " +
+                    "           GROUP BY sim2.starId) AS sc ON sc.starId = sim.starId " +
+                    "WHERE m.id = ? " +
+                    "GROUP BY m.id, m.title, m.year, m.director, r.rating;";
 
             // Declare our statement
             PreparedStatement statement = conn.prepareStatement(query);
@@ -74,57 +87,49 @@ public class SingleStarServlet extends HttpServlet
             // Perform the query
             ResultSet rs = statement.executeQuery();
 
-            JsonArray jsonArray = new JsonArray();
 
-            // Iterate through each row of rs
+            out.beginArray();
             while (rs.next())
             {
-
-                String starId = rs.getString("starId");
-                String starName = rs.getString("name");
-                String starDob = rs.getString("birthYear");
-
-                String movieId = rs.getString("movieId");
-                String movieTitle = rs.getString("title");
-                String movieYear = rs.getString("year");
-                String movieDirector = rs.getString("director");
-
                 // Create a JsonObject based on the data we retrieve from rs
-
-                JsonObject jsonObject = new JsonObject();
-                jsonObject.addProperty("star_id", starId);
-                jsonObject.addProperty("star_name", starName);
-                jsonObject.addProperty("star_dob", starDob);
-                jsonObject.addProperty("movie_id", movieId);
-                jsonObject.addProperty("movie_title", movieTitle);
-                jsonObject.addProperty("movie_year", movieYear);
-                jsonObject.addProperty("movie_director", movieDirector);
-
-                jsonArray.add(jsonObject);
+                out.beginObject();
+                out.name("movie_id").value(rs.getString("movieId"));
+                out.name("movie_title").value(rs.getString("title"));
+                out.name("movie_year").value(rs.getString("year"));
+                out.name("movie_director").value(rs.getString("director"));
+                out.name("movie_genre").value(rs.getString("genres"));
+                out.name("movie_stars").value(rs.getString("stars"));
+                out.name("movie_rating").value(rs.getString("rating"));
+                out.endObject();
             }
+            out.endArray();
+
             rs.close();
             statement.close();
 
-            // Write JSON string to output
-            out.write(jsonArray.toString());
             // Set response status to 200 (OK)
             response.setStatus(200);
 
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             // Write error message JSON object to output
-            JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("errorMessage", e.getMessage());
-            out.write(jsonObject.toString());
+            out.beginObject();
+            out.name("errorMessage").value(e.getMessage());
+            out.endObject();
 
             // Log error to localhost log
             request.getServletContext().log("Error:", e);
             // Set response status to 500 (Internal Server Error)
             response.setStatus(500);
-        } finally {
+        }
+        finally
+        {
             out.close();
         }
         long endTime = System.currentTimeMillis();
-        System.out.println("single-star request took:" + (endTime - startTime) + " ms");
+        System.out.println("single-movie request took:" + (endTime - startTime) + " ms");
+
         // Always remember to close db connection after usage. Here it's done by try-with-resources
     }
 }

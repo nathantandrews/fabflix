@@ -1,3 +1,5 @@
+package dev.wdal.main.auth;
+
 import com.google.gson.stream.JsonWriter;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;

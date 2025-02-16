@@ -24,13 +24,12 @@
             <transport-guarantee>CONFIDENTIAL</transport-guarantee>
         </user-data-constraint>
     </security-constraint>
-    <filter>
+    <!--filter>
         <filter-name>HtmlExtensionFilter</filter-name>
         <filter-class>HtmlExtensionFilter</filter-class>
     </filter>
-
     <filter-mapping>
         <filter-name>HtmlExtensionFilter</filter-name>
         <url-pattern>/*</url-pattern>
-    </filter-mapping>
+    </filter-mapping-->
 </web-app>

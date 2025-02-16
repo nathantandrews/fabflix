@@ -3,7 +3,7 @@ let editorElement = $("#editor");
 function showDBMetaData()
 {
     editorElement.empty();
-    let url = window.location.origin + "/fabflix/api/metadata";
+    let url = window.location.origin + "/fabflix/_dashboard/api/metadata";
     $.ajax({
         url: url,
         method: "GET",
@@ -42,7 +42,7 @@ function displayMetadata(resultData)
 function showAddStar()
 {
     editorElement.empty();
-    let url = window.location.origin + "/fabflix/pages/add-star"
+    let url = window.location.origin + "/fabflix/_dashboard/pages/add-star.html"
     console.log("fetching " + url);
     $.get(url)
         .done((data) => {
@@ -58,7 +58,7 @@ function submitAddStarForm(formSubmitEvent)
 {
     formSubmitEvent.preventDefault();
     console.log("submitAddStarForm running");
-    let newURL = window.location.origin + "/fabflix/api/add-star";
+    let newURL = window.location.origin + "/fabflix/_dashboard/api/add-star";
     $.ajax({
         url: newURL,
         method: "POST",
@@ -68,10 +68,8 @@ function submitAddStarForm(formSubmitEvent)
     });
 }
 
-function handleAddStarResult(resultDataJson)
+function handleAddStarResult(resultData)
 {
-    // let resultData = JSON.parse(resultDataJson);
-    let resultData = resultDataJson;
     console.log("handle add-star response");
     console.log(resultData);
     console.log(resultData[0]["status"]);
@@ -81,18 +79,16 @@ function handleAddStarResult(resultDataJson)
 
 function handleError(resultDataJson)
 {
-    // let resultData = JSON.parse(resultDataJson);
     let resultData = resultDataJson;
-
-    console.log(resultData["status"]);
-    console.log(resultData["message"])
-    $("#status-message").text(resultData["message"]);
+    console.log(resultData[0]["status"]);
+    console.log(resultData[0]["message"])
+    $("#status-message").text(resultData[0]["message"]);
 }
 
 function showAddMovie()
 {
     editorElement.empty();
-    let url = window.location.origin + "/fabflix/pages/add-movie"
+    let url = window.location.origin + "/fabflix/_dashboard/pages/add-movie.html"
     console.log("fetching " + url);
     $.get(url)
         .done((data) => {
@@ -108,7 +104,7 @@ function submitAddMovieForm(formSubmitEvent)
 {
     formSubmitEvent.preventDefault();
     console.log("submitAddMovieForm running");
-    let newURL = window.location.origin + "/fabflix/api/add-movie";
+    let newURL = window.location.origin + "/fabflix/_dashboard/api/add-movie";
     $.ajax({
         url: newURL,
         method: "POST",
@@ -118,14 +114,13 @@ function submitAddMovieForm(formSubmitEvent)
     });
 }
 
-function handleAddMovieResult(resultDataJson)
+function handleAddMovieResult(resultData)
 {
-    let resultData = JSON.parse(resultDataJson);
     console.log("handle add-movie response");
     console.log(resultData);
-    console.log(resultData["status"]);
-    console.log(resultData["message"]);
-    $("#status-message").text(resultData["message"]);
+    console.log(resultData[0]["status"]);
+    console.log(resultData[0]["message"]);
+    $("#status-message").text(resultData[0]["message"]);
 }
 
 function createNavbar()
@@ -135,7 +130,7 @@ function createNavbar()
         $("body").prepend(navbar);
 
         // Fetch and insert navbar content
-        let url = window.location.origin + "/fabflix/pages/employee-navbar"
+        let url = window.location.origin + "/fabflix/_dashboard/pages/navbar.html"
         console.log("fetching " + url);
         $.get(url)
             .done((data) => {

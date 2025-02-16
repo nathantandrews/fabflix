@@ -1,4 +1,4 @@
-package User;
+package dev.wdal.main.auth;
 
 public class User
 {

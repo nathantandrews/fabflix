@@ -1,3 +1,5 @@
+package dev.wdal.main;
+
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;

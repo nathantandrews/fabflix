@@ -1,4 +1,5 @@
-package Movie;
+package dev.wdal.main;
+
 import java.io.Serializable;
 
 

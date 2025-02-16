@@ -1,4 +1,5 @@
-import User.User;
+package dev.wdal.main.auth;
+
 import com.google.gson.JsonObject;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -13,8 +14,8 @@ import javax.sql.DataSource;
 import java.sql.*;
 import java.util.Objects;
 
-@WebServlet(name = "DashboardServlet", urlPatterns = "/api/_dashboard")
-public class DashboardServlet extends HttpServlet
+@WebServlet(name = "LoginServlet", urlPatterns = "/api/login")
+public class LoginServlet extends HttpServlet
 {
 
     private DataSource dataSource;
@@ -58,7 +59,7 @@ public class DashboardServlet extends HttpServlet
                     gRecaptchaResponse = (String) request.getSession().getAttribute("gRecaptchaResponse");
                 }
             }
-            System.out.println("gRecaptchaResponse=" + gRecaptchaResponse);
+//            System.out.println("gRecaptchaResponse=" + gRecaptchaResponse);
             if (gRecaptchaResponse != null && !gRecaptchaResponse.isEmpty())
             {
                 request.getSession().setAttribute("gRecaptchaResponse", gRecaptchaResponse);
@@ -107,19 +108,24 @@ public class DashboardServlet extends HttpServlet
             }
             else
             {
-                String emailQuery = "SELECT e.fullname FROM employees e WHERE e.email=?";
-                String passwordQuery = "SELECT e.password AS password FROM employees e WHERE e.fullname = ?";
+                String emailQuery = "SELECT c.id FROM customers c WHERE c.email=?";
+                String passwordQuery = "SELECT c.password AS password FROM customers c WHERE c.id = ?";
                 PreparedStatement emailStatement = conn.prepareStatement(emailQuery);
                 PreparedStatement passwordStatement = conn.prepareStatement(passwordQuery);
                 emailStatement.setString(1, email);
                 ResultSet emailRs = emailStatement.executeQuery();
                 if (emailRs.next())
                 {
-                    passwordStatement.setString(1, emailRs.getString("fullname"));
+                    passwordStatement.setString(1, emailRs.getString("id"));
                     ResultSet passwordRs = passwordStatement.executeQuery();
+                    boolean success;
                     if (passwordRs.next())
                     {
-
+                        String encryptedPassword = passwordRs.getString("password");
+                        // success = new StrongPasswordEncryptor().checkPassword(password, encryptedPassword);
+                        success = password.equals(encryptedPassword);
+                        if (success)
+                        {
                             // Login success:
                             // set this user into the session
                             request.getSession().setAttribute("user", new User(email));
@@ -127,6 +133,15 @@ public class DashboardServlet extends HttpServlet
                             jsonObj.addProperty("status", "success");
                             jsonObj.addProperty("message", "login success");
                             System.out.println("Login successful: " + email);
+                        }
+                        else
+                        {
+                            // Login fail
+                            jsonObj.addProperty("status", "fail");
+                            jsonObj.addProperty("message", "Invalid login credentials: password");
+
+                            System.out.println("Login failed: " + email);
+                        }
                     }
                     else
                     {
@@ -148,7 +163,7 @@ public class DashboardServlet extends HttpServlet
             }
             response.getWriter().write(jsonObj.toString());
             long endTime = System.currentTimeMillis();
-            System.out.println("login request took: " + (endTime - startTime) + " ms");
+            System.out.println("login request took:" + (endTime - startTime) + " ms");
         }
         catch (Exception e)
         {

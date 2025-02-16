@@ -1,3 +1,5 @@
+package dev.wdal.main;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import jakarta.servlet.ServletConfig;

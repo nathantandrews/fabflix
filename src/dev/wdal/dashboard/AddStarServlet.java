@@ -1,3 +1,5 @@
+package dev.wdal.dashboard;
+
 import com.google.gson.stream.JsonWriter;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -14,7 +16,7 @@ import javax.sql.DataSource;
 import java.io.IOException;
 
 // Declaring a WebServlet called AddStarServlet, which maps to url "/api/add-star"
-@WebServlet(name = "AddStarServlet", urlPatterns = "/api/add-star")
+@WebServlet(name = "AddStarServlet", urlPatterns = "/_dashboard/api/add-star")
 public class AddStarServlet extends HttpServlet
 {
     private static final long serialVersionUID = 2L;

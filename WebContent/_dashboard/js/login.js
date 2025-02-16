@@ -13,7 +13,7 @@ function handleLoginResult(resultDataJson)
     // If login succeeds, it will redirect the user to editor.html
     if (resultData["status"] === "success")
     {
-        let url = window.location.origin + "/fabflix/pages/editor";
+        let url = window.location.origin + "/fabflix/_dashboard/pages/editor.html";
         console.log(url);
         window.location.replace(url);
     }
@@ -33,7 +33,7 @@ function handleError(resultData)
 function submitLoginForm(formSubmitEvent)
 {
     formSubmitEvent.preventDefault();
-    let newURL = window.location.origin + "/fabflix/api/_dashboard";
+    let newURL = window.location.origin + "/fabflix/_dashboard/api/login";
     $.ajax({
         url: newURL,
         method: "POST",

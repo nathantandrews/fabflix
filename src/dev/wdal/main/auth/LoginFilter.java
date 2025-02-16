@@ -1,3 +1,5 @@
+package dev.wdal.main.auth;
+
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
@@ -57,19 +59,16 @@ public class LoginFilter implements Filter
         System.out.println("isUrlAllowedWithoutLogin: " + fullURIString);
         String partialURIString = fullURIString.replaceFirst(this.contextPath.toLowerCase() + "/", "");
         System.out.println("partialURIString: " + partialURIString);
-        return allowedURIs.stream().anyMatch(partialURIString::equals);
+        return allowedURIs.stream().anyMatch(partialURIString::equals) || partialURIString.startsWith("_dashboard/");
     }
 
     public void init(FilterConfig fConfig)
     {
         allowedURIs.add("");
-        allowedURIs.add("_dashboard");
-        allowedURIs.add("js/login.js");
-        allowedURIs.add("js/_dashboard.js");
         allowedURIs.add("images/favicon.ico");
         allowedURIs.add("css/styles.css");
+        allowedURIs.add("js/login.js");
         allowedURIs.add("api/login");
-        allowedURIs.add("api/_dashboard");
     }
 
     public void destroy()
