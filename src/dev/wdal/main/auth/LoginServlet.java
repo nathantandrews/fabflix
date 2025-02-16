@@ -122,8 +122,8 @@ public class LoginServlet extends HttpServlet
                     if (passwordRs.next())
                     {
                         String encryptedPassword = passwordRs.getString("password");
-                        // success = new StrongPasswordEncryptor().checkPassword(password, encryptedPassword);
-                        success = password.equals(encryptedPassword);
+                        success = new StrongPasswordEncryptor().checkPassword(password, encryptedPassword);
+//                        success = password.equals(encryptedPassword);
                         if (success)
                         {
                             // Login success:
