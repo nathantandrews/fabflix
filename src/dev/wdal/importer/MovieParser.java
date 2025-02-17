@@ -2,7 +2,6 @@ package dev.wdal.importer;
 
 import java.util.Set;
 import java.util.HashSet;
-import java.util.Scanner;
 import java.util.Iterator;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -24,6 +23,7 @@ public class MovieParser extends AbstractParser {
         this.classificationMgr = classificationMgr;
         this.genres = new HashSet<>();
         this.genreParser = new GenreParser();
+        openLog("movies_errors.log");
     }
 
     public void parseDocument() {
@@ -52,24 +52,29 @@ public class MovieParser extends AbstractParser {
             MovieKey key = movie.getKey();
             // check entire movie db
             if (movieMgr.hasMovieKey(key)) {
-                System.out.println("- duplicate movie detected, ignored: " + key);
+                errorLog.println("- duplicate movie detected, ignored: " + key);
+                errorLog.flush();
                 return;
             }
             // only imported movies will be in here
             if (movie.getImportId() == null) {
-                System.out.println("- null movie import id detected, ignored: " + key);
+                errorLog.println("- null movie import id detected, ignored: " + key);
+                errorLog.flush();
                 return;
             }
             if (movie.getImportId().isEmpty()) {
-                System.out.println("- empty movie import id detected, ignored: " + key);
+                errorLog.println("- empty movie import id detected, ignored: " + key);
+                errorLog.flush();
                 return;
             }
             if (movieMgr.hasMovieImportId(movie.getImportId())) {
-                System.out.println("- duplicate movie import id detected, ignored: " + key);
+                errorLog.println("- duplicate movie import id detected, ignored: " + key);
+                errorLog.flush();
                 return;
             }
             if (movie.getYear() == 0) {
-                System.out.println("- movie with non-number year detected, ignored: " + key);
+                errorLog.println("- movie with non-number year detected, ignored: " + key);
+                errorLog.flush();
                 return;
             }
             movieMgr.add(movie);

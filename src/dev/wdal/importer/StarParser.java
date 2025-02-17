@@ -10,6 +10,7 @@ public class StarParser extends AbstractParser {
 
     public StarParser(StarManager mgr) {
         this.mgr = mgr;
+        openLog("stars_errors.log");
     }
 
     public void parseDocument() {
@@ -34,7 +35,8 @@ public class StarParser extends AbstractParser {
             //add it to the list
             StarKey key = star.getKey();
             if (mgr.hasStarKey(key)) {
-                System.out.println("- duplicate star detected, ignored: " + key.toString());
+                errorLog.println("- duplicate star detected, ignored: " + key.toString());
+                errorLog.flush();
                 return;
             }
             mgr.add(star);

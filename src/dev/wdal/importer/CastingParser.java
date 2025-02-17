@@ -4,7 +4,6 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
 public class CastingParser extends AbstractParser {
-
     private MovieManager movieManager;
     private StarManager starManager;
     private CastingManager castingManager;
@@ -16,6 +15,7 @@ public class CastingParser extends AbstractParser {
         this.starManager = starManager;
         this.castingManager = castingManager;
         this.casting = new Casting();
+        openLog("stars_in_movies_errors.log");
     }
 
     public void parseDocument() {
@@ -41,17 +41,20 @@ public class CastingParser extends AbstractParser {
                 return;
             }
             if (!movieManager.hasMovieImportId(casting.getMovieImportId())) {
-                System.out.println("- casting movie import id not found, ignored: " + casting.getMovieImportId());
+                errorLog.println("- casting movie import id not found, ignored: " + casting.getMovieImportId());
+                errorLog.flush();
                 return;
             }
             if (!starManager.hasStarName(casting.getStarName())) {
-                System.out.println("- casting star name not found, adding: " + casting.getStarName());
+                errorLog.println("- casting star name not found, adding: " + casting.getStarName());
+                errorLog.flush();
                 Star newStar = new Star();
                 newStar.setName(casting.getStarName());
                 starManager.add(newStar);
             }
             if (castingManager.has(casting)) {
-                System.out.println("- duplicate casting found, ignored: " + casting);
+                errorLog.println("- duplicate casting found, ignored: " + casting);
+                errorLog.flush();
                 return;
             }
             castingManager.add(casting);

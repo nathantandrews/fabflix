@@ -8,7 +8,7 @@ import java.util.Scanner;
 import java.util.Iterator;
 import java.util.Collections;
 
-public class GenreParser {
+public class GenreParser extends AbstractParser {
     private static final Map<String, String> codedGenres;
     static {
         Map<String, String> m = new HashMap<>();
@@ -142,6 +142,7 @@ public class GenreParser {
 
     public GenreParser() {
         this.genres = new HashSet<>();
+        openLog("genres_errors.log");
     }
 
     public void clear() {
@@ -153,7 +154,8 @@ public class GenreParser {
             return codedGenres.get(codedGenre);
         }
         else {
-            System.out.println("- undecodable genre found, ignored '" + codedGenre + "'");
+            errorLog.println("- undecodable genre found, ignored '" + codedGenre + "'");
+            errorLog.flush();
             return "";
         }
     }

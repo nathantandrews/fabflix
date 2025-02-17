@@ -1,14 +1,13 @@
 package dev.wdal.importer;
 
 import java.util.Iterator;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.sql.*;
 import java.util.Set;
 import java.util.HashSet;
 
 public abstract class AbstractManager<T> {
+	protected PrintWriter insertionLog;
     protected Set<T> toInsert;
     protected Connection connection;
 	protected int lastId;
@@ -17,6 +16,12 @@ public abstract class AbstractManager<T> {
 	}
 
     public AbstractManager() {
+		try {
+			insertionLog = new PrintWriter(new FileOutputStream(getType() + "s_good.log"));
+		}
+		catch (IOException ioe) {
+			ioe.printStackTrace();
+		}
         this.toInsert = new HashSet<>();
         try {
             connection = Db.getConnection();
@@ -28,6 +33,12 @@ public abstract class AbstractManager<T> {
 		init();
         load();
     }
+
+	public void finalize() {
+		if (insertionLog != null) {
+			insertionLog.close();
+		}
+	}
 
 	protected Iterator<T> getIterator() {
 		return toInsert.iterator();
@@ -107,6 +118,7 @@ public abstract class AbstractManager<T> {
 
 	public void add(T value) {
 		toInsert.add(value);
-		System.out.println("+ " + getType() + ": " + value);
+		insertionLog.println(value);
+		insertionLog.flush();
 	}
 }
