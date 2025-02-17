@@ -119,12 +119,13 @@ public class DashboardLoginServlet extends HttpServlet
                 ResultSet emailRs = emailStatement.executeQuery();
                 if (emailRs.next())
                 {
+                    boolean success;
                     passwordStatement.setString(1, emailRs.getString("fullname"));
                     ResultSet passwordRs = passwordStatement.executeQuery();
                     if (passwordRs.next())
                     {
                         String encryptedPassword = passwordRs.getString("password");
-                        boolean success = password.equals(encryptedPassword);
+                        success = new StrongPasswordEncryptor().checkPassword(password, encryptedPassword);
                         if (success)
                         {
                             // Login success:
