@@ -224,6 +224,7 @@ public class MovieListServlet extends HttpServlet {
             }
             jsonWriter.endArray();
             jsonWriter.endObject();
+            jsonWriter.close();
 
             rs.close();
         }

@@ -69,9 +69,6 @@ public class PaymentServlet extends HttpServlet
             movieTitles.add(movie.getAsString());
         });
 
-        List<String> conditions = new ArrayList<>();
-        List<Object> parameters = new ArrayList<>();
-
         try (Connection conn = dataSource.getConnection()) {
             // First step is to validate the credit card information that the user put in.
             String creditCardQuery = "SELECT id FROM creditcards WHERE id = ? AND firstName = ? AND lastName = ? AND expiration = ?";

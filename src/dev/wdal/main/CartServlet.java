@@ -156,6 +156,7 @@ public class CartServlet extends HttpServlet
         jw.name("message").value("Cart Updated");
         jw.endObject();
         session.setAttribute("cart", cart);
+        jw.close();
     }
 
     private double getMovieCost(String movieTitle) {

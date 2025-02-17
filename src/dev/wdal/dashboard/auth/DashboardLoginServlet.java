@@ -1,7 +1,7 @@
 package dev.wdal.dashboard.auth;
 
 import dev.wdal.main.auth.User;
-import dev.wdal.main.auth.RecaptchaConstants;
+// import dev.wdal.main.auth.RecaptchaConstants;
 import dev.wdal.main.auth.RecaptchaVerifyUtils;
 import com.google.gson.JsonObject;
 import jakarta.servlet.ServletConfig;
@@ -9,7 +9,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.jasypt.util.password.StrongPasswordEncryptor;
+// import org.jasypt.util.password.StrongPasswordEncryptor;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
