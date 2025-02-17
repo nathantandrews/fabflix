@@ -1,0 +1,13 @@
+drop database moviedb;
+source create_table.sql;
+set autocommit=0;
+source ../movie-data.sql;
+commit;
+set autocommit=1;
+source ../price_update.sql;
+source stored-procedure.sql;
+select * from genres;
+select count(*) from stars;
+select count(*) from movies;
+select count(*) from genres_in_movies;
+select count(*) from stars_in_movies;
