@@ -9,7 +9,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-// import org.jasypt.util.password.StrongPasswordEncryptor;
+import org.jasypt.util.password.StrongPasswordEncryptor;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -124,7 +124,7 @@ public class DashboardLoginServlet extends HttpServlet
                     if (passwordRs.next())
                     {
                         String encryptedPassword = passwordRs.getString("password");
-                        boolean success = password.equals(encryptedPassword);
+                        boolean success = new StrongPasswordEncryptor().checkPassword(password, encryptedPassword);
                         if (success)
                         {
                             // Login success:
