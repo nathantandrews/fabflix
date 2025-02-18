@@ -8,7 +8,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.sql.*;
-import java.util.Random;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -41,7 +40,7 @@ public class AddStarServlet extends HttpServlet
      * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
      * response)
      */
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
     {
         long startTime = System.currentTimeMillis();
         response.setContentType("application/json"); // Response mime type
@@ -77,7 +76,11 @@ public class AddStarServlet extends HttpServlet
                 try (Connection conn = dataSource.getConnection();
                      PreparedStatement ps = conn.prepareStatement(insertStatement))
                 {
-                    starId = generateRandomId(conn,"s");
+                    starId = nextStarId(conn);
+                    if (starId == null)
+                    {
+                        throw new RuntimeException("next star id is null");
+                    }
                     ps.setString(1, starId);
                     ps.setString(2, starName);
 
@@ -108,7 +111,7 @@ public class AddStarServlet extends HttpServlet
                     ps.executeUpdate();
                     jw.beginObject();
                     jw.name("status").value("success");
-                    jw.name("message").value("star successfully added with name: " + starName + ", birth year: " + starBirthYear);
+                    jw.name("message").value("star successfully added with id: " + starId + " name: " + starName + ", birth year: " + starBirthYear);
                     jw.endObject();
                 }
                 catch (SQLException e)
@@ -135,42 +138,31 @@ public class AddStarServlet extends HttpServlet
         doPost(request, response);
     }
 
-    private String generateRandomId(Connection conn, String type)
+    private String nextStarId(Connection conn) throws SQLException
     {
-        String typeStr;
-        switch (type)
+        String checkQuery = "SELECT s.id FROM stars s ORDER BY s.id DESC LIMIT 1";
+        try (PreparedStatement ps = conn.prepareStatement(checkQuery);
+             ResultSet rs = ps.executeQuery())
         {
-            case "s":
-                typeStr = "nm";
-                break;
-            case "m":
-                typeStr = "tt";
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid type: " + type);
-        }
-        String format = typeStr + "%07d";
-        Random rand = new Random();
-        String newId;
-        boolean exists;
-        do
-        {
-            int randomNum = rand.nextInt(1_000_000);
-            newId = String.format(format, randomNum);
-            String checkQuery = "SELECT s.id FROM stars s WHERE s.id = ?";
-            try (PreparedStatement ps = conn.prepareStatement(checkQuery))
+            if (rs.next())
             {
-                ps.setString(1, newId);
-                ResultSet rs = ps.executeQuery();
-                exists = rs.next();
-                rs.close();
+                String lastIdStr = rs.getString(1);
+                int lastIdNum = Integer.parseInt(lastIdStr.substring(2));
+                System.out.println(lastIdNum);
+                ++lastIdNum;
+                String result = String.format("nm%07d", lastIdNum);
+                System.out.println(result);
+                return result;
             }
-            catch (SQLException e)
+            else
             {
-                throw new RuntimeException(e);
+                throw new SQLException("Something went wrong, no stars found in the database");
             }
         }
-        while (exists);
-        return newId;
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

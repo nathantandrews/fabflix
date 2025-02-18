@@ -6,8 +6,8 @@ import java.sql.SQLException;
 
 public class Db {
     private static String url = "jdbc:mysql://localhost:3306/moviedb?allowLoadLocalInfile=true";
-    private static String username = "bandrews";
-    private static String password = "123";
+    private static String username = "mytestuser";
+    private static String password = "My6$Password";
     private static Connection connection;
     public static Connection getConnection() throws SQLException {
         if (connection == null) {

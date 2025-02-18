@@ -31,6 +31,7 @@ public class GenreParser extends AbstractParser {
         m.put("cond", "Comedy");
         m.put("cmr", "Comedy");
         m.put("satire", "Satire");
+        m.put("sati", "Satire");
 
         m.put("docu", "Documentary");
         m.put("duco", "Documentary");
@@ -50,6 +51,7 @@ public class GenreParser extends AbstractParser {
 
         m.put("fant", "Fantasy");
         m.put("fanth", "Fantasy");
+        m.put("fanth*", "Fantasy");
         m.put("epic", "Fantasy");
 
         m.put("scfi", "Sci-Fi");
@@ -65,9 +67,11 @@ public class GenreParser extends AbstractParser {
         m.put("biop", "Biopic");
         m.put("biopp", "Biopic");
         m.put("biopix", "Biopic");
+        m.put("biopx", "Biopic");
 
         m.put("hist", "History");
 
+        m.put("drama", "Drama");
         m.put("dram", "Drama");
         m.put("draam", "Drama");
         m.put("dramn", "Drama");
@@ -134,6 +138,8 @@ public class GenreParser extends AbstractParser {
         m.put("road", "Road");
 
         m.put("art", "Art");
+
+        m.put("expm", "Experimental");
 
         codedGenres = Collections.unmodifiableMap(m);
     }

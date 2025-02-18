@@ -229,8 +229,39 @@ public class AddMovieServlet extends HttpServlet
                         cs.setString("genre_name", genreName);
 
                         cs.execute();
+                        String resultsQuery = "SELECT m.id AS movie_id, " +
+                                "gim.genreId AS genre_id, " +
+                                "sim.starId AS star_id " +
+                                "FROM movies m " +
+                                "JOIN genres_in_movies gim ON gim.movieId = m.id " +
+                                "JOIN stars_in_movies sim ON sim.movieId = m.id " +
+                                "WHERE m.title = ? AND m.director = ? AND m.year = ?";
 
-                        sendSuccessResponse(jw, "movie successfully added with title: " + movieTitle + ", year: " + movieYear + ", and director: " + movieDirector);
+                        try (PreparedStatement ps = conn.prepareStatement(resultsQuery))
+                        {
+                            ps.setString(1, movieTitle);
+                            ps.setString(2, movieDirector);
+                            ps.setInt(3, movieYearInt);
+                            ResultSet rs = ps.executeQuery();
+                            if (rs.next())
+                            {
+                                String printedMovieId = rs.getString(1);
+                                int printedGenreId = rs.getInt(2);
+                                String printedStarId = rs.getString(3);
+                                sendSuccessResponse(jw, "movie successfully added with movieId: " + printedMovieId + ", genreId: " + printedGenreId + ", and starId: " + printedStarId);
+                            }
+                            else
+                            {
+                                sendErrorResponse(jw, "Error: movie not added");
+                                reportTime();
+                            }
+                        }
+                        catch (SQLException e)
+                        {
+                            sendErrorResponse(jw, "Error: " + e.getMessage());
+                            reportTime();
+                            e.printStackTrace();
+                        }
                     }
                     catch (SQLException e)
                     {
