@@ -14,7 +14,7 @@ public class StarParser extends AbstractParser {
     }
 
     public void parseDocument() {
-        super.parseDocument("actors63.xml");
+        super.parseDocument("../actors63.xml");
     }
 
     //Event Handlers

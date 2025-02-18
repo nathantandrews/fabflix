@@ -27,7 +27,7 @@ public class MovieParser extends AbstractParser {
     }
 
     public void parseDocument() {
-        super.parseDocument("mains243.xml");
+        super.parseDocument("../mains243.xml");
     }
 
     //Event Handlers

@@ -19,7 +19,7 @@ public class CastingParser extends AbstractParser {
     }
 
     public void parseDocument() {
-        super.parseDocument("casts124.xml");
+        super.parseDocument("../casts124.xml");
     }
 
     //Event Handlers
