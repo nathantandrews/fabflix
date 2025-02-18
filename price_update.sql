@@ -1,0 +1,8 @@
+use moviedb;
+ALTER TABLE movies ADD COLUMN cost DECIMAL(5,2) NULL;
+SET SQL_SAFE_UPDATES = 0;
+UPDATE movies
+SET cost = ROUND(5 + (RAND() * 15), 2)
+WHERE cost IS NULL;
+SET SQL_SAFE_UPDATES = 1;
+
