@@ -90,7 +90,7 @@ CREATE TABLE employees
     password varchar(20) not null,
     fullname varchar(100)
 );
-
+INSERT INTO employees (email, password, fullname) VALUES ('classta@email.edu', 'classta', 'TA CS122B');
 
 CREATE INDEX idx_movie_ratings ON ratings(rating DESC);
 CREATE INDEX idx_movie_title ON movies(title);

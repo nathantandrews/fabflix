@@ -1,5 +1,4 @@
 SOURCE create_table.sql;
-INSERT INTO employees (email, password, fullname) VALUES ('classta@email.edu', 'classta', 'TA CS122B');
 SET GLOBAL autocommit=0;
 SOURCE ../movie-data.sql;
 COMMIT;
