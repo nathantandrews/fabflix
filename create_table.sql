@@ -5,10 +5,11 @@ USE moviedb;
 CREATE TABLE movies
 (
     id VARCHAR(10) NOT NULL,
-    title VARCHAR(100) NOT NULL,
+    title TEXT NOT NULL,
     year INT NOT NULL,
     director VARCHAR(100) NOT NULL,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    FULLTEXT (title)
 );
 
 CREATE TABLE stars
