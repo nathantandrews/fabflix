@@ -11,6 +11,7 @@ Prepared Statements and JDBC Connection Pooling Filenames:
 - src/dev/wdal/main/BrowsingServlet.java
 - src/dev/wdal/main/CartServlet.java
 - src/dev/wdal/main/MovieListServlet.java
+- src/dev/wdal/main/MovieSuggestionServlet.java
 - src/dev/wdal/main/PaymentServlet.java
 - src/dev/wdal/main/SingleMovieServlet.java
 - src/dev/wdal/main/SingleStarServlet.java

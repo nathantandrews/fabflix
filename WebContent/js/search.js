@@ -1,4 +1,4 @@
-titleElem = $("#title")
+let titleElem = $("#title")
 
 titleElem.autocomplete({
     // documentation of the lookup function can be found under the "Custom lookup function" section
@@ -6,12 +6,14 @@ titleElem.autocomplete({
         handleLookup(query, doneCallback)
     },
     onSelect: function(suggestion) {
+        console.log(suggestion)
         handleSelectSuggestion(suggestion)
     },
     // set delay time
     deferRequestBy: 300,
     // there are some other parameters that you might want to use to satisfy all the requirements
-    // TODO: add other parameters, such as minimum characters
+    minChars: 3,
+
 });
 
 titleElem.keypress(function(event) {
@@ -77,26 +79,36 @@ function getFormResults(queryParamsDict)
 
 function handleLookup(query, doneCallback) {
     console.log("autocomplete initiated")
-    console.log("sending AJAX request to backend Java Servlet")
 
-    // TODO: if you want to check past query results first, you can do it here
-
-    // sending the HTTP GET request to the Java Servlet endpoint movie-suggestion
-    // with the query data
-    jQuery.ajax({
-        method: "GET",
-        // generate the request url from the query.
-        // escape the query string to avoid errors caused by special characters
-        url: "/fabflix/api/movie-suggestion?query=" + escape(query),
-        success: function(data) {
-            // pass the data, query, and doneCallback function into the success handler
-            handleLookupAjaxSuccess(data, query, doneCallback)
-        },
-        error: function(errorData) {
-            console.log("lookup ajax error")
-            console.log(errorData)
-        }
-    })
+    let autoCompleteCache = getMapFromSession("autocomplete-cache");
+    let results = autoCompleteCache.get(query);
+    if (results == null)
+    {
+        console.log("sending AJAX request to backend Java Servlet")
+        // sending the HTTP GET request to the Java Servlet endpoint movie-suggestion
+        // with the query data
+        jQuery.ajax({
+            method: "GET",
+            // generate the request url from the query.
+            // escape the query string to avoid errors caused by special characters
+            url: "/fabflix/api/movie-suggestion?query=" + escape(query),
+            success: function(data) {
+                // pass the data, query, and doneCallback function into the success handler
+                console.log("autocomplete results from the database!")
+                results = JSON.parse(data);
+                handleLookupSuccess(results, query, doneCallback)
+            },
+            error: function(errorData) {
+                console.log("lookup ajax error")
+                console.log(errorData)
+            }
+        })
+    }
+    else
+    {
+        console.log("autocomplete results in the cache!");
+        handleLookupSuccess(results, query, doneCallback);
+    }
 }
 
 
@@ -107,15 +119,16 @@ function handleLookup(query, doneCallback) {
  * data is the JSON data string you get from your Java Servlet
  *
  */
-function handleLookupAjaxSuccess(data, query, doneCallback) {
-    console.log("lookup ajax successful")
+function handleLookupSuccess(jsonData, query, doneCallback) {
+    console.log("lookup successful: " + query + " = " + JSON.stringify(jsonData));
 
-    // parse the string into JSON
-    let jsonData = JSON.parse(data);
-    console.log(jsonData)
-
-    // TODO: if you want to cache the result into a global variable you can do it here
-
+    let autoCompleteCache = getMapFromSession("autocomplete-cache");
+    let results = autoCompleteCache.get(query);
+    if (results == null)
+    {
+        autoCompleteCache.set(query, jsonData);
+        storeMapInSession("autocomplete-cache", autoCompleteCache);
+    }
     // call the callback function provided by the autocomplete library
     // add "{suggestions: jsonData}" to satisfy the library response format according to
     //   the "Response Format" section in documentation
@@ -129,8 +142,21 @@ function handleLookupAjaxSuccess(data, query, doneCallback) {
  *
  * You can redirect to the page you want using the suggestion data.
  */
-function handleSelectSuggestion(suggestion) {
-    // TODO: jump to the specific result page based on the selected suggestion
-    window.location.href = 'fabflix/pages/single-movie.html?id=' + suggestion["data"]["movieID"]
-    console.log("you select " + suggestion["value"] + " with ID " + suggestion["data"]["movieID"])
+function handleSelectSuggestion(suggestion)
+{
+    window.location.href = 'single-movie.html?id=' + suggestion["data"];
+    console.log("you select " + suggestion["value"] + " with ID " + suggestion["data"]);
+}
+
+function storeMapInSession(key, map) {
+    const mapString = JSON.stringify(Array.from(map.entries()));
+    sessionStorage.setItem(key, mapString);
+}
+
+function getMapFromSession(key) {
+    const mapString = sessionStorage.getItem(key);
+    if (mapString) {
+        return new Map(JSON.parse(mapString));
+    }
+    return new Map();
 }

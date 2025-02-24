@@ -94,6 +94,6 @@ CREATE TABLE employees
 INSERT INTO employees (email, password, fullname) VALUES ('classta@email.edu', 'classta', 'TA CS122B');
 
 CREATE INDEX idx_movie_ratings ON ratings(rating DESC);
-CREATE INDEX idx_movie_title ON movies(title);
+# CREATE INDEX idx_movie_title ON movies(title);
 CREATE INDEX idx_movie_director ON movies(director);
 CREATE INDEX idx_star_name ON stars(name);

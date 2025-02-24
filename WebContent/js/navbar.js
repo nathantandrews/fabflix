@@ -6,7 +6,7 @@ function createNavbar()
 
         // Fetch and insert navbar content
         let url = window.location.origin + "/fabflix/pages/navbar.html"
-        console.log("fetching " + url);
+        // console.log("fetching " + url);
         $.get(url)
             .done((data) => {
                 navbar.html(data);

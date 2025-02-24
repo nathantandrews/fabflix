@@ -18,6 +18,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
+import java.util.stream.Stream;
 
 import static java.lang.Integer.parseInt;
 
@@ -108,8 +110,15 @@ public class MovieListServlet extends HttpServlet {
             }
             else
             {
-                conditions.add("LOWER(m.title) LIKE LOWER(?) ");
-                parameters.add(title + "%");
+                Scanner in = new Scanner(title);
+                Stream<String> sin = in.tokens();
+                String queryTerms = sin.collect(StringBuilder::new, (sb, element) -> {
+                    sb.append("+").append(element).append("* "); }, StringBuilder::append).toString().trim();
+                sin.close();
+                in.close();
+                conditions.add("MATCH (m.title) AGAINST ( ? IN BOOLEAN MODE)");
+                parameters.add(queryTerms);
+                System.out.println(queryTerms);
             }
         }
         if (director != null && !director.isEmpty())
@@ -150,7 +159,6 @@ public class MovieListServlet extends HttpServlet {
                         "           FROM stars_in_movies sim2 " +
                         "           GROUP BY sim2.starId) AS sc ON sc.starId = sm.starId "
         );
-
 
         if (!conditions.isEmpty())
         {
@@ -201,7 +209,7 @@ public class MovieListServlet extends HttpServlet {
             mainPs.setInt(parameters.size() + 1, moviesPerPage);
             mainPs.setInt(parameters.size() + 2, offset);
 
-//            System.out.println("MainPS: " + mainPs.toString());
+            System.out.println("MainPS: " + mainPs);
             ResultSet rs = mainPs.executeQuery();
 
             JsonWriter jsonWriter = new JsonWriter(response.getWriter());

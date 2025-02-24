@@ -41,19 +41,21 @@ public class MovieSuggestionServlet extends HttpServlet
             sb.append("+").append(element).append("* "); }, StringBuilder::append).toString().trim();
         sin.close();
         in.close();
-
-        String idQuery = "SELECT m.id AS movie_id, m.title AS movie_name FROM movies m WHERE MATCH (m.title) AGAINST ( " + queryTerms + " IN BOOLEAN MODE) LIMIT 10;";
+        System.out.println(queryTerms);
+        String idQuery = "SELECT m.id AS movie_id, m.title AS movie_title, m.year as movie_year FROM movies m WHERE MATCH (m.title) AGAINST ( '" + queryTerms + "' IN BOOLEAN MODE) LIMIT 10;";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(idQuery);
              ResultSet rs = ps.executeQuery();
              JsonWriter jsonWriter = new JsonWriter(response.getWriter()))
         {
+            String title;
             jsonWriter.beginArray();
             while (rs.next())
             {
+                title = rs.getString("movie_title") + " (" + rs.getString("movie_year") + ")";
                 jsonWriter.beginObject();
-                jsonWriter.name("id").value(rs.getString("movie_id"));
-                jsonWriter.name("name").value(rs.getString("movie_name"));
+                jsonWriter.name("value").value(title);
+                jsonWriter.name("data").value(rs.getString("movie_id"));
                 jsonWriter.endObject();
             }
             jsonWriter.endArray();
