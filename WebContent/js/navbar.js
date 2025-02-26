@@ -22,7 +22,7 @@ function backToList()
     let url = sessionStorage.getItem("lastMovieListURL");
     if (!url)
     {
-        url = `movie-list.html?title=a&sortBy=rating-desc-title-asc&page=1&moviesPerPage=10`;
+        url = `movie-list.html?action=movies&title=a&sortBy=rating-desc-title-asc&page=1&moviesPerPage=10`;
     }
     window.location.href = url;
 }

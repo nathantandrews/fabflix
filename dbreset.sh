@@ -1,4 +1,3 @@
 #!/bin/bash
-mysql -u mytestuser -p < dbreset.sql
+mysql -u bandrews --password=123 < dbreset.sql
 mvn exec:java -Dexec.mainClass="UpdateSecurePassword"
-mvn exec:java -Dexec.mainClass="UpdateSecurePassword2"

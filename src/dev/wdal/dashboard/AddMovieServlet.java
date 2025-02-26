@@ -19,7 +19,7 @@ import java.io.IOException;
 public class AddMovieServlet extends HttpServlet
 {
     private static final long serialVersionUID = 2L;
-    private static final String serviceName = "add-movie";
+    private static final String SERVICE_NAME = "add-movie";
 
     // Create a dataSource which registered in web.xml
     private DataSource dataSource;
@@ -43,7 +43,7 @@ public class AddMovieServlet extends HttpServlet
     private void reportTime()
     {
         this.endTime = System.currentTimeMillis();
-        System.out.println(serviceName + " request took: " + (this.endTime - this.startTime) + " ms");
+        System.out.println(SERVICE_NAME + " request took: " + (this.endTime - this.startTime) + " ms");
     }
 
     private void sendResponse(JsonWriter jw, String status, String message) throws IOException

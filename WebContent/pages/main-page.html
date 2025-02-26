@@ -10,7 +10,9 @@
     <link rel="shortcut icon" href="../images/favicon.ico">
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.devbridge-autocomplete/1.4.11/jquery.autocomplete.min.js"></script>
+    
     <title>Fabflix - Main Page</title>
 </head>
 <body>
@@ -18,21 +20,24 @@
     <div class="card">
         <h1>Welcome to Fabflix</h1>
         <p>Explore movies and find your next favorite film!</p>
+        <div class="fts-text">
+            <input type="text" class="fts-input" id="keywords" name="keywords" placeholder="Enter title keywords">
+        </div>
+        <div class="fts-btn">
+            <button onclick="submitFts()" class="btn btn-primary btn-custom">Keyword Search</button>
+        </div>
         <div class="search-btn">
-            <a href="search.html" class="btn btn-primary btn-custom">🔍 Search Movies</a>
+            <a href="search.html" class="btn btn-primary btn-custom btn-success">🔍 Search Movies</a>
         </div>
         <div class="browse-btn">
-            <a href="browsing.html" class="btn btn-success btn-custom">📚 Browse Categories</a>
+            <a href="browsing.html" class="btn btn-primary btn-custom btn-checkout">📚 Browse Categories</a>
         </div>
+        <div id="error_message"></div>
     </div>
 </div>
-
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-
+<script src="../js/main-page.js"></script>
+<script src="../js/movie-utils.js"></script>
 <script src="../js/navbar.js"></script>
 <script src="../js/logout.js"></script>
-
 </body>
 </html>

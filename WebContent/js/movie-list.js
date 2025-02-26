@@ -1,103 +1,121 @@
-let movieListElement = $("#movie_list");
-let moviesPerPageSelect = $("#moviesPerPageSelect");
-let sortOptions = $("#sort-options");
-
-let totalMovies = 0;
 let totalPages = 0;
 
-// Grab session constraints
-let currentPage = sessionStorage.getItem("page");
-console.log("currentPage updated from session: " + currentPage);
-if (currentPage == null)
-{
-    currentPage = 1;
-}
-currentPage = parseInt(currentPage);
-console.log("currentPage parsed as int: " + currentPage);
-let moviesPerPage = sessionStorage.getItem("moviesPerPage");
-console.log("moviesPerPage updated from session: " + moviesPerPage);
-if (moviesPerPage == null)
-{
-    moviesPerPage = 10;
-    console.log("moviesPerPage updated to default: " + moviesPerPage);
-}
-moviesPerPage = parseInt(moviesPerPage);
-console.log("moviesPerPage parsed as int: " + moviesPerPage);
+let constraintSource = sessionStorage.getItem("lastMovieListURL");
 
-let sortBy = sessionStorage.getItem("sortBy");
-console.log("sortBy updated from session: " + sortBy);
-if (sortBy == null)
+if (constraintSource == null)
 {
-    sortBy = "rating-desc-title-asc";
-    console.log("sortBy updated to default: " + sortBy);
+    constraintSource = "query";
 }
 
-sortOptions.val(sortBy);
+let constraints = {};
+
+function setDataConstraints(params, constraints)
+{
+    let dataParams=["title", "year", "director", "star", "genre", "keywords"];
+    for (let i = 0; i < dataParams.length; i++)
+    {
+        let p = params.get(dataParams[i]);
+        console.log("p = " + p);
+        if (p != null)
+        {
+            p = p.trim();
+            console.log("p = " + p);
+            if (p.length != 0)
+            {
+                constraints[dataParams[i]] = p;
+                console.log("constraints[" + dataParams[i] + "] = " + constraints[dataParams[i]]);
+            }
+        }
+    }
+}
+
+function setDisplayConstraints(params, constraints)
+{
+    let displayParams=["page", "moviesPerPage", "sortBy", "action"];
+    let defaultDisplayParams={"page":"1", "moviesPerPage":"10", "sortBy":"rating-desc-title-asc", "action":"movies"};
+    for (let i = 0; i < displayParams.length; i++)
+    {
+        constraints[displayParams[i]] = params.get(displayParams[i]);
+        if (constraints[displayParams[i]] == null)
+        {
+            constraints[displayParams[i]] = defaultDisplayParams[displayParams[i]];
+            console.log(displayParams[i] + " updated to default: " + constraints[displayParams[i]]);
+        }
+    }
+}
+
+function getConstraints(constraints)
+{
+    if (constraintSource == "query")
+    {
+        let params = new URLSearchParams(window.location.search);
+        console.log("query constraintSource = " + window.location.search);
+        setDataConstraints(params, constraints);
+        setDisplayConstraints(params, constraints);
+    }
+    else
+    {
+        let params = new URLSearchParams(constraintSource.substring(constraintSource.lastIndexOf("?")));
+        console.log("session constraintSource = " + constraintSource);
+        setDataConstraints(params, constraints);
+        setDisplayConstraints(params, constraints);
+    }
+}
+
+getConstraints(constraints);
+console.log("initial page constraints = " + JSON.stringify(constraints));
+
+let sortOptions = $("#sort-options");
+sortOptions.val(constraints["sortBy"]);
 sortOptions.on("change", function (event)
 {
     if (event.originalEvent !== undefined)
     {
-        sessionStorage.setItem("fromSearchOrBrowse", "false");
-        console.log("User triggered sort change");
-        sessionStorage.setItem("sortBy", $(this).val());
-        console.log("sortBy added to session: " + $(this).val());
-        currentPage = 1;
+        console.log("User triggered sortBy change");
+        constraints["sortBy"] = $(this).val();
+        constraints["page"] = "1";
         console.log("currentPage updated to default: 1");
-        sessionStorage.setItem("page", "1");
-        console.log("page added to session (set back to default): 1");
         fetchMovies();
     }
     else
     {
-        console.log("Programmatic change detected");
+        console.log("Programmatic sortBy change detected");
     }
 });
 
-console.log("Select showing moviesPerPage: " + moviesPerPage);
-moviesPerPageSelect.val(moviesPerPage);
+console.log("Select showing moviesPerPage: " + constraints["moviesPerPage"]);
+let moviesPerPageSelect = $("#moviesPerPageSelect");
+moviesPerPageSelect.val(parseInt(constraints["moviesPerPage"]));
 moviesPerPageSelect.on("change", function (event)
 {
     if (event.originalEvent !== undefined)
     {
-        sessionStorage.setItem("fromSearchOrBrowse", "false");
-        console.log("User triggered sort change");
-        moviesPerPage = parseInt($(this).val());
-        console.log("moviesPerPage parsed to int: " + moviesPerPage);
-        sessionStorage.setItem("moviesPerPage", moviesPerPage);
-        console.log("moviesPerPage added to session: " + moviesPerPage);
-        currentPage = 1;
+        console.log("User triggered moviesPerPage change");
+        constraints["moviesPerPage"] = $(this).val().toString();
+        constraints["page"] = "1";
         console.log("currentPage updated to default: 1");
-        sessionStorage.setItem("page", "1");
-        console.log("page added to session (set back to default): 1");
         fetchMovies();
     }
     else
     {
-        console.log("Programmatic change detected");
+        console.log("Programmatic moviesPerPage change detected");
     }
-});
-
-document.addEventListener("DOMContentLoaded", () =>
-{
-    sessionStorage.setItem("lastMovieListURL", window.location.href);
 });
 
 fetchMovies();
 
 function fetchMovies()
 {
-    let queryParamsDict = {};
-    getQueryParams(queryParamsDict);
-    let lastURL = `movie-list.html${getQueryString(queryParamsDict)}`;
+    let lastURL = `movie-list.html${getQueryString(constraints)}`;
+    console.log("saving lastURL = " + lastURL);
     sessionStorage.setItem("lastMovieListURL", lastURL);
-    let url = window.location.origin + "/fabflix/api/movie-list"
+    let url = window.location.origin + "/fabflix/api/" + constraints["action"];
     $.ajax({
         url: url,
         method: "GET",
-        data: queryParamsDict,
+        data: constraints,
         success: (response) => {
-            totalMovies = response["totalMovies"];
-            displayMovies(response["movies"]);
+            displayMovies(response["totalMovies"], response["movies"]);
         },
         error: (xhr, status, error) => {
             console.error("Error fetching movies:", error);
@@ -105,8 +123,10 @@ function fetchMovies()
     });
 }
 
-function displayMovies(movies)
+function displayMovies(totalMovies, movies)
 {
+    let movieListElement = $("#movie_list");
+
     movieListElement.empty();
     if (movies.length === 0) {
         movieListElement.append("<p>No movies found.</p>");
@@ -119,10 +139,10 @@ function displayMovies(movies)
 
             let queryParamsDict = {};
             getDefaultConstraints(queryParamsDict);
+            queryParamsDict["action"] = "browse";
             queryParamsDict["genre"] = genreId;
-            return `<a onclick="sessionStorage.setItem('fromSearchOrBrowse', 'true');" href="movie-list.html${getQueryString(queryParamsDict)}">${g.split('(')[0]}</a>`;
+            return `<a onclick="sessionStorage.removeItem('lastMovieListURL');" href="movie-list.html${getQueryString(queryParamsDict)}">${g.split('(')[0]}</a>`;
         }).slice(0,3).join(", ");
-        sessionStorage.removeItem("genre");
 
         let starsList = movie.stars.split(',').map(s => {
             let starId = s.match(/\((.*?)\)/)[1];
@@ -159,13 +179,14 @@ function displayMovies(movies)
     }).join("");
 
     movieListElement.append(movieCards);
-    paginationControls();
+    paginationControls(totalMovies);
 }
 
-function paginationControls()
+function paginationControls(totalMovies)
 {
-    totalPages = Math.ceil(totalMovies / moviesPerPage);
+    totalPages = Math.ceil(totalMovies / parseInt(constraints["moviesPerPage"]));
     let totalPagesSpan = $("#totalPages");
+    let currentPage = parseInt(constraints["page"]);
     totalPagesSpan.text(`Page ${currentPage} of ${totalPages}`);
     let prevPage = $("#prevPage");
     let nextPage = $("#nextPage");
@@ -175,75 +196,23 @@ function paginationControls()
 
 function prevPageClicked()
 {
+    let currentPage = parseInt(constraints["page"]);
     if (currentPage > 1)
     {
         currentPage--;
-        sessionStorage.setItem("fromSearchOrBrowse", "false");
-        console.log("fromSearchOrBrowse added to session: false");
-        sessionStorage.setItem("page", currentPage);
-        console.log("page added to session: " + currentPage);
+        constraints["page"] = currentPage.toString();
         fetchMovies();
     }
 }
 
 function nextPageClicked()
 {
+    let currentPage = parseInt(constraints["page"]);
     if (currentPage < totalPages)
     {
         currentPage++;
-        sessionStorage.setItem("fromSearchOrBrowse", "false");
-        console.log("fromSearchOrBrowse added to session: false");
-        sessionStorage.setItem("page", currentPage);
-        console.log("page added to session: " + currentPage);
+        constraints["page"] = currentPage.toString();
         fetchMovies();
-    }
-}
-
-function getQueryParams(queryParamsDict)
-{
-    let fromSearchOrBrowse= sessionStorage.getItem("fromSearchOrBrowse");
-    if (fromSearchOrBrowse === "false")
-    {
-        queryParamsDict["title"] = sessionStorage.getItem("title");
-        queryParamsDict["year"] = sessionStorage.getItem("year");
-        queryParamsDict["director"] = sessionStorage.getItem("director");
-        queryParamsDict["star"] = sessionStorage.getItem("star");
-        queryParamsDict["genre"] = sessionStorage.getItem("genre");
-        queryParamsDict["sortBy"] = sessionStorage.getItem("sortBy");
-        queryParamsDict["page"] = sessionStorage.getItem("page");
-        queryParamsDict["moviesPerPage"] = sessionStorage.getItem("moviesPerPage");
-    }
-    else
-    {
-        let params = new URLSearchParams(window.location.search);
-        let title = params.get("title");
-        let year = params.get("year");
-        let director = params.get("director");
-        let star = params.get("star");
-        let genre = params.get("genre");
-        if (title && title.length !== 0)
-        {
-            queryParamsDict["title"] = title;
-        }
-        if (year && year.length !== 0)
-        {
-            queryParamsDict["year"] = year;
-        }
-        if (director && director.length !== 0)
-        {
-            queryParamsDict["director"] = director;
-        }
-        if (star && star.length !== 0)
-        {
-            queryParamsDict["star"] = star;
-        }
-        if (genre && genre.length !== 0)
-        {
-            queryParamsDict["genre"] = genre;
-        }
-        queryParamsDict["sortBy"] = params.get("sortBy");
-        queryParamsDict["page"] = params.get("page");
-        queryParamsDict["moviesPerPage"] = params.get("moviesPerPage");
     }
 }
 

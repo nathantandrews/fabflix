@@ -132,6 +132,18 @@ th {
 }
 .checkout-btn {
     margin: 0 auto;
+    display: inline-flex;
+}
+.fts-text {
+    margin: 0 auto;
+}
+.fts-input {
+    margin: 0 auto;
+    width: 250px;
+    padding: 10px;
+    font-size: 1.1rem;
+    border-radius: 5px;
+    margin: 5px;
 }
 
 .login-error-message {

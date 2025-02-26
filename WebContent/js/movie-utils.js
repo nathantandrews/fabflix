@@ -20,17 +20,6 @@ function getDefaultConstraints(queryParamsDict)
     queryParamsDict["page"] = page;
 }
 
-function getSearchKeys()
-{
-    return [
-        "title",
-        "year",
-        "director",
-        "star",
-        "genre"
-    ];
-}
-
 function addToCart(title)
 {
     let url = window.location.origin + "/fabflix/api/cart";

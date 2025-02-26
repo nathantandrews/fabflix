@@ -56,9 +56,9 @@ public class DashboardLoginFilter implements Filter
          You might also want to allow some CSS files, etc...
          */
         String fullURIString = requestURI.toLowerCase();
-        System.out.println("dash isUrlAllowedWithoutLogin: " + fullURIString);
+        // System.out.println("dash isUrlAllowedWithoutLogin: " + fullURIString);
         String partialURIString = fullURIString.replaceFirst(this.contextPath.toLowerCase()+ "/_dashboard/", "");
-        System.out.println("dash partialURIString: " + partialURIString);
+        // System.out.println("dash partialURIString: " + partialURIString);
         return allowedURIs.stream().anyMatch(partialURIString::equals);
     }
 

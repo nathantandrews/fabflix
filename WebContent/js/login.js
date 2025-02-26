@@ -10,14 +10,8 @@ function handleLoginResult(resultDataJson)
     console.log(resultData);
     console.log(resultData["status"]);
 
-    // If login succeeds, it will redirect the user to movie-list.html
     if (resultData["status"] === "success")
     {
-        sessionStorage.setItem("fromSearchOrBrowse", "false");
-        sessionStorage.setItem("title", "A");
-        sessionStorage.setItem("moviesPerPage", "10");
-        sessionStorage.setItem("page", "1");
-        sessionStorage.setItem("sortBy", "rating-desc-title-asc");
         window.location.replace(window.location.origin + "/fabflix/pages/main-page.html");
     }
     else

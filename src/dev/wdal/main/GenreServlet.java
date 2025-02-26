@@ -14,8 +14,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-@WebServlet(name = "BrowsingServlet", urlPatterns = "/api/browsing")
-public class BrowsingServlet extends HttpServlet
+@WebServlet(name = "GenreServlet", urlPatterns = "/api/genres")
+public class GenreServlet extends HttpServlet
 {
     private DataSource dataSource;
 

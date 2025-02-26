@@ -33,6 +33,7 @@ function handleResult(resultData)
 function searchMovies(filter, type)
 {
     let queryParamsDict = {};
+    queryParamsDict["action"] = "browse";
     switch (type)
     {
         case 'c':
@@ -46,17 +47,12 @@ function searchMovies(filter, type)
             break;
     }
     getDefaultConstraints(queryParamsDict);
-    let queryParamsSet = new Set(Object.keys(queryParamsDict));
-    let queryParamsList = getSearchKeys().filter(item => !queryParamsSet.has(item));
-    queryParamsList.forEach((elem) => {
-        sessionStorage.removeItem(elem);
-    });
+    sessionStorage.removeItem("lastMovieListURL");
 
     let queryString = getQueryString(queryParamsDict);
     console.log("Query String:" + queryString);
     if (queryString !== "")
     {
-        sessionStorage.setItem("fromSearchOrBrowse", "true");
         window.location.href = `movie-list.html${queryString}`;
     }
     else
@@ -88,7 +84,7 @@ function createBrowseOptions()
     else
     {
         switchBtn.append(`<button class="btn btn-primary" onClick="createBrowseOptions()">Browse by Title</button>`);
-        let url = window.location.origin + "/fabflix/api/browsing";
+        let url = window.location.origin + "/fabflix/api/genres";
         console.log("fetching genres: " + url);
         $.ajax
         ({

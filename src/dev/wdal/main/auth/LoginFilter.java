@@ -56,9 +56,9 @@ public class LoginFilter implements Filter
          You might also want to allow some CSS files, etc...
          */
         String fullURIString = requestURI.toLowerCase();
-        System.out.println("isUrlAllowedWithoutLogin: " + fullURIString);
+        // System.out.println("isUrlAllowedWithoutLogin: " + fullURIString);
         String partialURIString = fullURIString.replaceFirst(this.contextPath.toLowerCase() + "/", "");
-        System.out.println("partialURIString: " + partialURIString);
+        // System.out.println("partialURIString: " + partialURIString);
         return allowedURIs.stream().anyMatch(partialURIString::equals) || partialURIString.startsWith("_dashboard/");
     }
 
