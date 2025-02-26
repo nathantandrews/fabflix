@@ -5,20 +5,24 @@ import java.io.*;
 import java.sql.*;
 import java.util.Set;
 import java.util.HashSet;
+import java.lang.ref.Cleaner;
 
 public abstract class AbstractManager<T> {
 	protected PrintWriter insertionLog;
     protected Set<T> toInsert;
     protected Connection connection;
 	protected int lastId;
+    private static final Cleaner cleaner = Cleaner.create();
+    private final Cleaner.Cleanable cleanable;
 
 	protected void init() {
 	}
 
-    public AbstractManager() {
+    protected AbstractManager() {
+        this.cleanable = cleaner.register(this, this::cleanup);
 		try {
 			insertionLog = new PrintWriter(new FileOutputStream(getType() + "s_good.log"));
-		}
+        }
 		catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
@@ -34,8 +38,9 @@ public abstract class AbstractManager<T> {
         load();
     }
 
-	public void finalize() {
+	public void cleanup() {
 		if (insertionLog != null) {
+            insertionLog.flush();
 			insertionLog.close();
 		}
 	}

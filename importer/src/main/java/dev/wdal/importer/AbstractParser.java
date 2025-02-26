@@ -6,36 +6,56 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
+import java.lang.ref.Cleaner;
 
 public class AbstractParser extends DefaultHandler {
     protected PrintWriter errorLog;
-    public void openLog(String filename) {
-        try {
+    private static final Cleaner cleaner = Cleaner.create();
+    private final Cleaner.Cleanable cleanable;
+    protected AbstractParser()
+    {
+        this.cleanable = cleaner.register(this, this::cleanup);
+    }
+    public void openLog(String filename)
+    {
+        try
+        {
             errorLog = new PrintWriter(new FileOutputStream(filename));
         }
-        catch (IOException ioe) {
+        catch (IOException ioe)
+        {
             ioe.printStackTrace();
         }
     }
-    public void finalize() {
-        if (errorLog != null) {
+    public void cleanup()
+    {
+        if (errorLog != null)
+        {
             errorLog.flush();
             errorLog.close();
         }
     }
-    public void parseDocument(String filename) {
+    public void parseDocument(String filename)
+    {
         //get a factory
         SAXParserFactory spf = SAXParserFactory.newInstance();
-        try {
+        try
+        {
             //get a new instance of parser
             SAXParser sp = spf.newSAXParser();
             //parse the file and also register this class for call backs
             sp.parse(filename, this);
-        } catch (SAXException se) {
+        }
+        catch (SAXException se)
+        {
             se.printStackTrace();
-        } catch (ParserConfigurationException pce) {
+        }
+        catch (ParserConfigurationException pce)
+        {
             pce.printStackTrace();
-        } catch (IOException ie) {
+        }
+        catch (IOException ie)
+        {
             ie.printStackTrace();
         }
     }

@@ -1,23 +1,23 @@
-## CS 122B Project 1
+## CS 122B Project 4
 DEMO YOUTUBE LINK: https://youtu.be/gAr7JOLEzjY
 
 
 Prepared Statements and JDBC Connection Pooling Filenames:
-- src/dev/wdal/dashboard/auth/DashboardLoginServlet.java
-- src/dev/wdal/dashboard/AddMovieServlet.java
-- src/dev/wdal/dashboard/AddStarServlet.java
-- src/dev/wdal/dashboard/DatabaseMetadataServlet.java
-- src/dev/wdal/main/auth/LoginServlet.java
-- src/dev/wdal/main/BrowsingServlet.java
-- src/dev/wdal/main/CartServlet.java
-- src/dev/wdal/main/MovieListServlet.java
-- src/dev/wdal/main/MovieSuggestionServlet.java
-- src/dev/wdal/main/PaymentServlet.java
-- src/dev/wdal/main/SingleMovieServlet.java
-- src/dev/wdal/main/SingleStarServlet.java
+- webapp/src/main/java/dev/wdal/dashboard/auth/DashboardLoginServlet.java
+- webapp/src/main/java/dev/wdal/dashboard/AddMovieServlet.java
+- webapp/src/main/java/dev/wdal/dashboard/AddStarServlet.java
+- webapp/src/main/java/dev/wdal/dashboard/DatabaseMetadataServlet.java
+- webapp/src/main/java/dev/wdal/main/auth/LoginServlet.java
+- webapp/src/main/java/dev/wdal/main/BrowsingServlet.java
+- webapp/src/main/java/dev/wdal/main/CartServlet.java
+- webapp/src/main/java/dev/wdal/main/MovieListServlet.java
+- webapp/src/main/java/dev/wdal/main/MovieSuggestionServlet.java
+- webapp/src/main/java/dev/wdal/main/PaymentServlet.java
+- webapp/src/main/java/dev/wdal/main/SingleMovieServlet.java
+- webapp/src/main/java/dev/wdal/main/SingleStarServlet.java
   
 Only PreparedStatements:
-- src/dev/wdal/importer/AbstractManager.java and its derived classes
+- importer/src/main/java/dev/wdal/importer/AbstractManager.java and its derived classes
 
 Parsing Time Optimization Strategies:
 - Database Cache for quicker checking of duplicates

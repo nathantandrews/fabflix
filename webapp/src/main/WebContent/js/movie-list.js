@@ -15,15 +15,12 @@ function setDataConstraints(params, constraints)
     for (let i = 0; i < dataParams.length; i++)
     {
         let p = params.get(dataParams[i]);
-        console.log("p = " + p);
         if (p != null)
         {
             p = p.trim();
-            console.log("p = " + p);
             if (p.length != 0)
             {
                 constraints[dataParams[i]] = p;
-                console.log("constraints[" + dataParams[i] + "] = " + constraints[dataParams[i]]);
             }
         }
     }
@@ -49,21 +46,19 @@ function getConstraints(constraints)
     if (constraintSource == "query")
     {
         let params = new URLSearchParams(window.location.search);
-        console.log("query constraintSource = " + window.location.search);
         setDataConstraints(params, constraints);
         setDisplayConstraints(params, constraints);
     }
     else
     {
         let params = new URLSearchParams(constraintSource.substring(constraintSource.lastIndexOf("?")));
-        console.log("session constraintSource = " + constraintSource);
         setDataConstraints(params, constraints);
         setDisplayConstraints(params, constraints);
     }
 }
 
 getConstraints(constraints);
-console.log("initial page constraints = " + JSON.stringify(constraints));
+// console.log("initial page constraints = " + JSON.stringify(constraints));
 
 let sortOptions = $("#sort-options");
 sortOptions.val(constraints["sortBy"]);
@@ -107,7 +102,7 @@ fetchMovies();
 function fetchMovies()
 {
     let lastURL = `movie-list.html${getQueryString(constraints)}`;
-    console.log("saving lastURL = " + lastURL);
+    // console.log("saving lastURL = " + lastURL);
     sessionStorage.setItem("lastMovieListURL", lastURL);
     let url = window.location.origin + "/fabflix/api/" + constraints["action"];
     $.ajax({

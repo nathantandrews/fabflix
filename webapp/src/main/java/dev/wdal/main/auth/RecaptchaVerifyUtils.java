@@ -7,13 +7,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
+import java.net.URI;
 
 public class RecaptchaVerifyUtils {
 
     public static final String SITE_VERIFY_URL = "https://www.google.com/recaptcha/api/siteverify";
 
     public static void verify(String gRecaptchaResponse) throws Exception {
-        URL verifyUrl = new URL(SITE_VERIFY_URL);
+        URL verifyUrl = new URI(SITE_VERIFY_URL).toURL();
 
         // Open Connection to URL
         HttpsURLConnection conn = (HttpsURLConnection) verifyUrl.openConnection();
