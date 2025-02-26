@@ -11,6 +11,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jasypt.util.password.StrongPasswordEncryptor;
 
+import javax.security.auth.login.LoginException;
+import javax.security.auth.login.FailedLoginException;
+import javax.security.auth.login.AccountNotFoundException;
+import javax.security.auth.login.CredentialNotFoundException;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -36,6 +40,55 @@ public class DashboardLoginServlet extends HttpServlet
         }
     }
 
+    private static void setFailureMessage(JsonObject jo, String message)
+    {
+        jo.addProperty("status", "fail");
+        jo.addProperty("message", message);
+    }
+
+    protected void doRecaptcha(HttpServletRequest request) throws LoginException
+    {
+        String gRecaptchaResponse = request.getParameter("g-recaptcha-response");
+        if (gRecaptchaResponse == null || gRecaptchaResponse.isEmpty())
+        {
+            gRecaptchaResponse = (String)request.getSession().getAttribute("gRecaptchaResponse");
+            if (gRecaptchaResponse == null || gRecaptchaResponse.isEmpty())
+            {
+                throw new CredentialNotFoundException("Recaptcha verification failed.");
+            }
+        }
+        System.out.println("gRecaptchaResponse=" + gRecaptchaResponse);
+        request.getSession().setAttribute("gRecaptchaResponse", gRecaptchaResponse);
+        try
+        {
+            RecaptchaVerifyUtils.verify(gRecaptchaResponse);
+        }
+        catch (Exception e)
+        {
+            throw new FailedLoginException("Recaptcha verification failed.");
+        }
+    }
+
+    protected void doBasicCredChecks(String email, String password) throws LoginException
+    {
+        //            System.out.println("Email: " + email);
+        if (Objects.equals(email, "") && Objects.equals(password, ""))
+        {
+            System.out.println("Login failed: null/empty email and password");
+            throw new FailedLoginException("Please input your email and password.");
+        }
+        if (Objects.equals(email, ""))
+        {
+            System.out.println("Login failed: null/empty email");
+            throw new FailedLoginException("Please input your email.");
+        }
+        if (Objects.equals(password, ""))
+        {
+            System.out.println("Login failed: null/empty password");
+            throw new FailedLoginException("Please input your password.");
+        }
+    }
+
     /**
      * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
      */
@@ -47,86 +100,39 @@ public class DashboardLoginServlet extends HttpServlet
 
             JsonObject jsonObj = new JsonObject();
 
-            String gRecaptchaResponse = request.getParameter("g-recaptcha-response");
-            if (gRecaptchaResponse == null || gRecaptchaResponse.isEmpty())
+            try
             {
-                if (request.getSession().getAttribute("gRecaptchaResponse") == null)
-                {
-                    jsonObj.addProperty("status", "fail");
-                    jsonObj.addProperty("message", "Recaptcha verification failed.");
-                    response.getWriter().write(jsonObj.toString());
-                    return;
-                }
-                else
-                {
-                    gRecaptchaResponse = (String) request.getSession().getAttribute("gRecaptchaResponse");
-                }
-            }
-            System.out.println("gRecaptchaResponse=" + gRecaptchaResponse);
-            if (gRecaptchaResponse != null && !gRecaptchaResponse.isEmpty())
-            {
-                request.getSession().setAttribute("gRecaptchaResponse", gRecaptchaResponse);
-                try
-                {
-                    RecaptchaVerifyUtils.verify(gRecaptchaResponse);
-                }
-                catch (Exception e)
-                {
-                    jsonObj.addProperty("status", "fail");
-                    jsonObj.addProperty("message", "Recaptcha verification failed.");
-                    response.getWriter().write(jsonObj.toString());
-                    return;
-                }
-            }
-            else
-            {
-                jsonObj.addProperty("status", "fail");
-                jsonObj.addProperty("message", "Recaptcha verification failed.");
-                response.getWriter().write(jsonObj.toString());
-                return;
-            }
-            String email = request.getParameter("email");
-            String password = request.getParameter("password");
-//            System.out.println("Email: " + email);
-            if (Objects.equals(email, "") && Objects.equals(password, ""))
-            {
-                jsonObj.addProperty("status", "fail");
-                jsonObj.addProperty("message", "Please input your email and password.");
-
-                System.out.println("Login failed: null email and password");
-            }
-            else if (Objects.equals(email, ""))
-            {
-                jsonObj.addProperty("status", "fail");
-                jsonObj.addProperty("message", "Please input your email.");
-
-                System.out.println("Login failed: null email");
-            }
-            else if (Objects.equals(password, ""))
-            {
-                jsonObj.addProperty("status", "fail");
-                jsonObj.addProperty("message", "Please input your password.");
-
-                System.out.println("Login failed: null password");
-            }
-            else
-            {
+                doRecaptcha(request);
+                String email = request.getParameter("email");
+                String password = request.getParameter("password");
+                doBasicCredChecks(email, password);
                 String emailQuery = "SELECT e.fullname FROM employees e WHERE e.email=?";
                 String passwordQuery = "SELECT e.password AS password FROM employees e WHERE e.fullname = ?";
-                PreparedStatement emailStatement = conn.prepareStatement(emailQuery);
-                PreparedStatement passwordStatement = conn.prepareStatement(passwordQuery);
-                emailStatement.setString(1, email);
-                ResultSet emailRs = emailStatement.executeQuery();
-                if (emailRs.next())
+                try (PreparedStatement emailStatement = conn.prepareStatement(emailQuery);
+                    PreparedStatement passwordStatement = conn.prepareStatement(passwordQuery))
                 {
-                    passwordStatement.setString(1, emailRs.getString("fullname"));
-                    ResultSet passwordRs = passwordStatement.executeQuery();
-                    if (passwordRs.next())
+                    emailStatement.setString(1, email);
+                    try (ResultSet emailRs = emailStatement.executeQuery())
                     {
-                        String encryptedPassword = passwordRs.getString("password");
-                        boolean success = new StrongPasswordEncryptor().checkPassword(password, encryptedPassword);
-                        if (success)
+                        if (!emailRs.next())
                         {
+                            System.out.println("Login failed: " + email);
+                            throw new FailedLoginException("Invalid login credentials: email");
+                        }
+                        passwordStatement.setString(1, emailRs.getString("fullname"));
+                        try (ResultSet passwordRs = passwordStatement.executeQuery())
+                        {
+                            if (!passwordRs.next())
+                            {
+                                throw new AccountNotFoundException("Invalid login credentials: email");
+                            }
+                            String encryptedPassword = passwordRs.getString("password");
+                            boolean success = new StrongPasswordEncryptor().checkPassword(password, encryptedPassword);
+                            if (!success)
+                            {
+                                System.out.println("Login failed: " + email);
+                                throw new FailedLoginException("Invalid login credentials: email");
+                            }
                             // Login success:
                             // set this user into the session
                             User user = new User(email);
@@ -136,33 +142,13 @@ public class DashboardLoginServlet extends HttpServlet
                             jsonObj.addProperty("status", "success");
                             jsonObj.addProperty("message", "login success");
                             System.out.println("Login successful: " + email);
-                        }
-                        else
-                        {
-                            // Login fail
-                            jsonObj.addProperty("status", "fail");
-                            jsonObj.addProperty("message", "Invalid login credentials: email");
-
-                            System.out.println("Login failed: " + email);
-                        }
+                        }              
                     }
-                    else
-                    {
-                        // Login fail
-                        jsonObj.addProperty("status", "fail");
-                        jsonObj.addProperty("message", "Invalid login credentials: email");
-
-                        System.out.println("Login failed: " + email);
-                    }                    
                 }
-                else
-                {
-                    // Login fail
-                    jsonObj.addProperty("status", "fail");
-                    jsonObj.addProperty("message", "Invalid login credentials: email");
-
-                    System.out.println("Login failed: " + email);
-                }
+            }
+            catch (LoginException e)
+            {
+                setFailureMessage(jsonObj, e.getMessage());
             }
             response.getWriter().write(jsonObj.toString());
             long endTime = System.currentTimeMillis();

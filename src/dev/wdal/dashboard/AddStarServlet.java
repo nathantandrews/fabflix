@@ -19,9 +19,13 @@ import java.io.IOException;
 public class AddStarServlet extends HttpServlet
 {
     private static final long serialVersionUID = 2L;
+    private static final String serviceName = "add-star";
 
     // Create a dataSource which registered in web.xml
     private DataSource dataSource;
+
+    private long startTime;
+    private long endTime;
 
     public void init(ServletConfig config)
     {
@@ -36,13 +40,39 @@ public class AddStarServlet extends HttpServlet
         }
     }
 
+    private void reportTime()
+    {
+        this.endTime = System.currentTimeMillis();
+        System.out.println(serviceName + " request took: " + (this.endTime - this.startTime) + " ms");
+    }
+
+    private void sendResponse(JsonWriter jw, String status, String message) throws IOException
+    {
+        jw.beginArray();
+        jw.beginObject();
+        jw.name("status").value(status);
+        jw.name("message").value(message);
+        jw.endObject();
+        jw.endArray();
+    }
+
+    private void sendErrorResponse(JsonWriter jw, String message) throws IOException
+    {
+        this.sendResponse(jw, "failure", message);
+    }
+
+    private void sendSuccessResponse(JsonWriter jw, String message) throws IOException
+    {
+        this.sendResponse(jw, "success", message);
+    }
+
     /**
      * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
      * response)
      */
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
     {
-        long startTime = System.currentTimeMillis();
+        this.startTime = System.currentTimeMillis();
         response.setContentType("application/json"); // Response mime type
 
         response.setCharacterEncoding("UTF-8");
@@ -54,23 +84,16 @@ public class AddStarServlet extends HttpServlet
 
             boolean starNameExists = !starName.isEmpty();
             boolean starBirthYearExists = !starBirthYear.isEmpty();
-            jw.beginArray();
-            if (!starNameExists)
+            try
             {
-                jw.beginObject();
-                jw.name("status").value("failure");
-                jw.name("message").value("The star name cannot be empty");
-                jw.endObject();
-            }
-            else if (starBirthYearExists && starBirthYear.length() != 4)
-            {
-                jw.beginObject();
-                jw.name("status").value("failure");
-                jw.name("message").value("Invalid birth year format");
-                jw.endObject();
-            }
-            else
-            {
+                if (!starNameExists)
+                {
+                    throw new IllegalArgumentException("The star name cannot be empty");
+                }
+                if (starBirthYearExists && starBirthYear.length() != 4)
+                {
+                    throw new NumberFormatException("Invalid birth year format");
+                }
                 String insertStatement = "INSERT INTO stars (id, name, birthYear) VALUES (?, ?, ?)";
                 String starId;
                 try (Connection conn = dataSource.getConnection();
@@ -97,40 +120,29 @@ public class AddStarServlet extends HttpServlet
                         }
                         catch (NumberFormatException e)
                         {
-                            jw.beginObject();
-                            jw.name("status").value("failure");
-                            jw.name("message").value("Invalid birth year format");
-                            jw.endObject();
-                            jw.endArray();
-                            long endTime = System.currentTimeMillis();
-                            System.out.println("add-star request took: " + (endTime - startTime) + " ms");
-                            return;
+                            throw new NumberFormatException("Invalid birth year format");
                         }
                     }
 
                     ps.executeUpdate();
-                    jw.beginObject();
-                    jw.name("status").value("success");
-                    jw.name("message").value("star successfully added with id: " + starId + " name: " + starName + ", birth year: " + starBirthYear);
-                    jw.endObject();
+                    sendSuccessResponse(jw, "star successfully added with id: " + starId + " name: " + starName + ", birth year: " + starBirthYear);
                 }
                 catch (SQLException e)
                 {
-                    jw.beginObject();
-                    jw.name("status").value("failure");
-                    jw.name("message").value("Error: " + e.getMessage());
-                    jw.endObject();
                     e.printStackTrace();
+                    throw new RuntimeException("Error: " + e.getMessage());
                 }
             }
-            jw.endArray();
-            long endTime = System.currentTimeMillis();
-            System.out.println("add-star request took: " + (endTime - startTime) + " ms");
+            catch (RuntimeException e)
+            {
+                sendErrorResponse(jw, e.getMessage());
+            }
         }
         catch (IOException e)
         {
             e.printStackTrace();
         }
+        reportTime();
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException
@@ -144,20 +156,17 @@ public class AddStarServlet extends HttpServlet
         try (PreparedStatement ps = conn.prepareStatement(checkQuery);
              ResultSet rs = ps.executeQuery())
         {
-            if (rs.next())
-            {
-                String lastIdStr = rs.getString(1);
-                int lastIdNum = Integer.parseInt(lastIdStr.substring(2));
-                System.out.println(lastIdNum);
-                ++lastIdNum;
-                String result = String.format("nm%07d", lastIdNum);
-                System.out.println(result);
-                return result;
-            }
-            else
+            if (!rs.next())
             {
                 throw new SQLException("Something went wrong, no stars found in the database");
             }
+            String lastIdStr = rs.getString(1);
+            int lastIdNum = Integer.parseInt(lastIdStr.substring(2));
+            System.out.println(lastIdNum);
+            ++lastIdNum;
+            String result = String.format("nm%07d", lastIdNum);
+            System.out.println(result);
+            return result;
         }
         catch (SQLException e)
         {

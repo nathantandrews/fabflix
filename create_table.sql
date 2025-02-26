@@ -97,3 +97,12 @@ CREATE INDEX idx_movie_ratings ON ratings(rating DESC);
 # CREATE INDEX idx_movie_title ON movies(title);
 CREATE INDEX idx_movie_director ON movies(director);
 CREATE INDEX idx_star_name ON stars(name);
+
+DROP FUNCTION IF EXISTS ed;
+CREATE FUNCTION ed RETURNS INTEGER SONAME 'libed.so';
+
+DROP FUNCTION IF EXISTS edrec;
+CREATE FUNCTION edrec RETURNS INTEGER SONAME 'libedrec.so';
+
+DROP FUNCTION IF EXISTS edth;
+CREATE FUNCTION edth RETURNS INTEGER SONAME 'libedth.so';

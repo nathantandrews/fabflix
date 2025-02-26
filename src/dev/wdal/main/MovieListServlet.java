@@ -11,8 +11,6 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -110,15 +108,17 @@ public class MovieListServlet extends HttpServlet {
             }
             else
             {
-                Scanner in = new Scanner(title);
-                Stream<String> sin = in.tokens();
-                String queryTerms = sin.collect(StringBuilder::new, (sb, element) -> {
-                    sb.append("+").append(element).append("* "); }, StringBuilder::append).toString().trim();
-                sin.close();
-                in.close();
-                conditions.add("MATCH (m.title) AGAINST ( ? IN BOOLEAN MODE)");
-                parameters.add(queryTerms);
-                System.out.println(queryTerms);
+                conditions.add("LOWER(m.title) LIKE LOWER(?)");
+                parameters.add(title + "%");
+            //     Scanner in = new Scanner(title);
+            //     Stream<String> sin = in.tokens();
+            //     String queryTerms = sin.collect(StringBuilder::new, (sb, element) -> {
+            //         sb.append("+").append(element).append("* "); }, StringBuilder::append).toString().trim();
+            //     sin.close();
+            //     in.close();
+            //     conditions.add("MATCH (m.title) AGAINST ( ? IN BOOLEAN MODE)");
+            //     parameters.add(queryTerms);
+            //     System.out.println(queryTerms);
             }
         }
         if (director != null && !director.isEmpty())
@@ -190,12 +190,13 @@ public class MovieListServlet extends HttpServlet {
 
 //            System.out.println("CountPS: " + countPs.toString());
 
-            ResultSet countRs = countPs.executeQuery();
-//            System.out.println("got to after executing count query");
             int totalMovies = 0;
-            if (countRs.next())
-            {
-                totalMovies = countRs.getInt("totalMovies");
+            try (ResultSet countRs = countPs.executeQuery()) {
+//                System.out.println("got to after executing count query");
+                if (countRs.next())
+                {
+                    totalMovies = countRs.getInt("totalMovies");
+                }
             }
 
 //            System.out.println("got to after count query results");
@@ -210,37 +211,33 @@ public class MovieListServlet extends HttpServlet {
             mainPs.setInt(parameters.size() + 2, offset);
 
             System.out.println("MainPS: " + mainPs);
-            ResultSet rs = mainPs.executeQuery();
-
-            JsonWriter jsonWriter = new JsonWriter(response.getWriter());
-
-            jsonWriter.beginObject();
-            jsonWriter.name("totalMovies").value(totalMovies);
-            jsonWriter.name("movies").beginArray();
-            while (rs.next())
-            {
+            try (ResultSet rs = mainPs.executeQuery();
+                JsonWriter jsonWriter = new JsonWriter(response.getWriter())) {
                 jsonWriter.beginObject();
-                jsonWriter.name("id").value(rs.getString("id"));
-                jsonWriter.name("rating").value(rs.getDouble("rating"));
-                jsonWriter.name("title").value(rs.getString("title"));
-                jsonWriter.name("year").value(rs.getInt("year"));
-                jsonWriter.name("director").value(rs.getString("director"));
-                jsonWriter.name("cost").value(rs.getDouble("cost"));
-                jsonWriter.name("genres").value(rs.getString("genres"));
-                jsonWriter.name("stars").value(rs.getString("stars"));
+                jsonWriter.name("totalMovies").value(totalMovies);
+                jsonWriter.name("movies").beginArray();
+                while (rs.next())
+                {
+                    jsonWriter.beginObject();
+                    jsonWriter.name("id").value(rs.getString("id"));
+                    jsonWriter.name("rating").value(rs.getDouble("rating"));
+                    jsonWriter.name("title").value(rs.getString("title"));
+                    jsonWriter.name("year").value(rs.getInt("year"));
+                    jsonWriter.name("director").value(rs.getString("director"));
+                    jsonWriter.name("cost").value(rs.getDouble("cost"));
+                    jsonWriter.name("genres").value(rs.getString("genres"));
+                    jsonWriter.name("stars").value(rs.getString("stars"));
+                    jsonWriter.endObject();
+                }
+                jsonWriter.endArray();
                 jsonWriter.endObject();
             }
-            jsonWriter.endArray();
-            jsonWriter.endObject();
-            jsonWriter.close();
-
-            rs.close();
         }
         catch (Exception e)
         {
             response.setStatus(500);
             //Weird errors getting on not using the same jsonWriter or something?
-            try (JsonWriter jw = new JsonWriter(new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8))) {
+            try (JsonWriter jw = new JsonWriter(response.getWriter())) {
                 jw.beginObject();
                 jw.name("error").value("Internal Server Error: " + e.getMessage());
                 jw.endObject();

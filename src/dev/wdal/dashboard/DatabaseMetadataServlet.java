@@ -38,10 +38,10 @@ public class DatabaseMetadataServlet extends HttpServlet
                             "WHERE TABLE_SCHEMA='moviedb'\n" +
                             "ORDER BY TABLE_NAME;";
         try (Connection conn = dataSource.getConnection();
-             JsonWriter jw = new JsonWriter(response.getWriter()))
-        {
-            PreparedStatement ps = conn.prepareStatement(tableQuery);
-            ResultSet rs = ps.executeQuery();
+             JsonWriter jw = new JsonWriter(response.getWriter());
+             PreparedStatement ps = conn.prepareStatement(tableQuery);
+             ResultSet rs = ps.executeQuery())
+         {
             jw.beginArray();
             while (rs.next())
             {
@@ -49,27 +49,27 @@ public class DatabaseMetadataServlet extends HttpServlet
                         "FROM information_schema.columns\n" +
                         "WHERE TABLE_SCHEMA='moviedb' AND TABLE_NAME=?\n" +
                         "ORDER BY ORDINAL_POSITION;";
-                PreparedStatement ps2 = conn.prepareStatement(columnQuery);
-                ps2.setString(1, rs.getString("TABLE_NAME"));
-                ResultSet rs2 = ps2.executeQuery();
-                jw.beginObject();
-                jw.name("tableName").value(rs.getString("TABLE_NAME"));
-                jw.name("columns").beginArray();
-                while (rs2.next())
+                try (PreparedStatement ps2 = conn.prepareStatement(columnQuery))
                 {
-                    jw.beginObject();
-                    jw.name("columnName").value(rs2.getString("COLUMN_NAME"));
-                    jw.name("dataType").value(rs2.getString("DATA_TYPE"));
-                    jw.endObject();
+                    ps2.setString(1, rs.getString("TABLE_NAME"));
+                    try (ResultSet rs2 = ps2.executeQuery())
+                    {
+                        jw.beginObject();
+                        jw.name("tableName").value(rs.getString("TABLE_NAME"));
+                        jw.name("columns").beginArray();
+                        while (rs2.next())
+                        {
+                            jw.beginObject();
+                            jw.name("columnName").value(rs2.getString("COLUMN_NAME"));
+                            jw.name("dataType").value(rs2.getString("DATA_TYPE"));
+                            jw.endObject();
+                        }
+                        jw.endArray();
+                        jw.endObject();
+                    }
                 }
-                jw.endArray();
-                jw.endObject();
-                rs2.close();
-                ps2.close();
             }
             jw.endArray();
-            rs.close();
-            ps.close();
         }
         catch (Exception e)
         {

@@ -13,8 +13,7 @@ public class LogoutServlet extends HttpServlet
 {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException
     {
-        JsonWriter jsonWriter = new JsonWriter(response.getWriter());
-        try
+        try (JsonWriter jsonWriter = new JsonWriter(response.getWriter()))
         {
             request.getSession().invalidate();
             response.setContentType("application/json");
@@ -26,13 +25,9 @@ public class LogoutServlet extends HttpServlet
         catch (Exception e)
         {
             System.out.println("Error:" + e);
-            jsonWriter.beginObject();
-            jsonWriter.name("status").value("error");
-            jsonWriter.endObject();
-        }
-        finally
-        {
-            jsonWriter.close();
+            // jsonWriter.beginObject();
+            // jsonWriter.name("status").value("error");
+            // jsonWriter.endObject();
         }
     }
 }

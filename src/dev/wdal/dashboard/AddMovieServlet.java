@@ -90,20 +90,16 @@ public class AddMovieServlet extends HttpServlet
             boolean movieYearExists = !movieYear.isEmpty();
             boolean movieDirectorExists = !movieDirector.isEmpty();
             boolean starDobExists = !starDob.isEmpty();
-            if (!movieTitleExists || !movieYearExists || !movieDirectorExists)
+            try
             {
-                sendErrorResponse(jw, "A new movie requires a title, year, and director");
-                reportTime();
-                return;
-            }
-            else if (movieYearExists && movieYear.length() != 4)
-            {
-                sendErrorResponse(jw, "Invalid movie year format");
-                reportTime();
-                return;
-            }
-            else
-            {
+                if (!movieTitleExists || !movieYearExists || !movieDirectorExists)
+                {
+                    throw new IllegalArgumentException("A new movie requires a title, year, and director");
+                }
+                if (movieYearExists && movieYear.length() != 4)
+                {
+                    throw new NumberFormatException("Invalid movie year format");
+                }
                 int movieYearInt = 0;
                 try
                 {
@@ -111,9 +107,7 @@ public class AddMovieServlet extends HttpServlet
                 }
                 catch (NumberFormatException e)
                 {
-                    sendErrorResponse(jw, "Invalid movie year format");
-                    reportTime();
-                    return;
+                    throw new NumberFormatException("Invalid movie year format");
                 }
 
                 int starDOBInt = 0;
@@ -125,9 +119,7 @@ public class AddMovieServlet extends HttpServlet
                     }
                     catch (NumberFormatException e)
                     {
-                        sendErrorResponse(jw, "Invalid star birth year format");
-                        reportTime();
-                        return;
+                        throw new NumberFormatException("Invalid star birth year format");
                     }
                 }
 
@@ -139,20 +131,13 @@ public class AddMovieServlet extends HttpServlet
                         ps.setString(1, movieTitle);
                         ps.setInt(2, movieYearInt);
                         ps.setString(3, movieDirector);
-                        ResultSet rs = ps.executeQuery();
-                        if (rs.next())
+                        try (ResultSet rs = ps.executeQuery())
                         {
-                            sendErrorResponse(jw, "Movie already exists");
-                            reportTime();
-                            return;
+                            if (rs.next())
+                            {
+                                throw new IllegalArgumentException("Movie already exists");
+                            }
                         }
-                    }
-                    catch (SQLException e)
-                    {
-                        sendErrorResponse(jw, "Error: " + e.getMessage());
-                        reportTime();
-                        e.printStackTrace();
-                        return;
                     }
 
                     String starId = null;
@@ -161,19 +146,13 @@ public class AddMovieServlet extends HttpServlet
                     {
                         ps.setString(1, starName);
                         ps.setInt(2, starDOBInt);
-                        ResultSet rs = ps.executeQuery();
-                        if (rs.next())
+                        try (ResultSet rs = ps.executeQuery())
                         {
-                            starId = rs.getString("id");
+                            if (rs.next())
+                            {
+                                starId = rs.getString("id");
+                            }
                         }
-                        rs.close();
-                    }
-                    catch (SQLException e)
-                    {
-                        sendErrorResponse(jw, "Error: " + e.getMessage());
-                        reportTime();
-                        e.printStackTrace();
-                        return;
                     }
 
                     String genreId = null;
@@ -181,19 +160,13 @@ public class AddMovieServlet extends HttpServlet
                     try (PreparedStatement ps = conn.prepareStatement(genreQuery))
                     {
                         ps.setString(1, genreName);
-                        ResultSet rs = ps.executeQuery();
-                        if (rs.next())
+                        try (ResultSet rs = ps.executeQuery())
                         {
-                            genreId = rs.getString("id");
+                            if (rs.next())
+                            {
+                                genreId = rs.getString("id");
+                            }
                         }
-                        rs.close();
-                    }
-                    catch (SQLException e)
-                    {
-                        sendErrorResponse(jw, "Error: " + e.getMessage());
-                        reportTime();
-                        e.printStackTrace();
-                        return;
                     }
 
                     try (CallableStatement cs = conn.prepareCall("CALL add_movie(?,?,?,?,?,?,?,?,?,?)"))
@@ -242,46 +215,36 @@ public class AddMovieServlet extends HttpServlet
                             ps.setString(1, movieTitle);
                             ps.setString(2, movieDirector);
                             ps.setInt(3, movieYearInt);
-                            ResultSet rs = ps.executeQuery();
-                            if (rs.next())
+                            try (ResultSet rs = ps.executeQuery())
                             {
+                                if (!rs.next())
+                                {
+                                    throw new RuntimeException("Error: movie not added");
+                                }
                                 String printedMovieId = rs.getString(1);
                                 int printedGenreId = rs.getInt(2);
                                 String printedStarId = rs.getString(3);
                                 sendSuccessResponse(jw, "movie successfully added with movieId: " + printedMovieId + ", genreId: " + printedGenreId + ", and starId: " + printedStarId);
                             }
-                            else
-                            {
-                                sendErrorResponse(jw, "Error: movie not added");
-                                reportTime();
-                            }
                         }
-                        catch (SQLException e)
-                        {
-                            sendErrorResponse(jw, "Error: " + e.getMessage());
-                            reportTime();
-                            e.printStackTrace();
-                        }
-                    }
-                    catch (SQLException e)
-                    {
-                        sendErrorResponse(jw, "Error: " + e.getMessage());
-                        reportTime();
-                        e.printStackTrace();
                     }
                 }
                 catch (SQLException e)
                 {
-                    sendErrorResponse(jw, "Error: " + e.getMessage());
-                    reportTime();
                     e.printStackTrace();
+                    throw new RuntimeException("Error: " + e.getMessage());
                 }
+            }
+            catch (RuntimeException e)
+            {
+                sendErrorResponse(jw, e.getMessage());
             }
         }
         catch (IOException e)
         {
             e.printStackTrace();
         }
+        reportTime();
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException

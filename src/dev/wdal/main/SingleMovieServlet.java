@@ -58,8 +58,6 @@ public class SingleMovieServlet extends HttpServlet
         // Get a connection from dataSource and let resource manager close the connection after usage.
         try (Connection conn = dataSource.getConnection())
         {
-            // Get a connection from dataSource
-
             // Construct a query with parameter represented by "?"
             String query = "SELECT m.id as movieId, m.title, m.year, m.director, " +
                     "GROUP_CONCAT(DISTINCT CONCAT(g.name, ' (', g.id, ')') ORDER BY g.name SEPARATOR ',') as genres, " +
@@ -78,34 +76,30 @@ public class SingleMovieServlet extends HttpServlet
                     "GROUP BY m.id, m.title, m.year, m.director, r.rating;";
 
             // Declare our statement
-            PreparedStatement statement = conn.prepareStatement(query);
+            try (PreparedStatement statement = conn.prepareStatement(query)) {
+                // Set the parameter represented by "?" in the query to the id we get from url,
+                // num 1 indicates the first "?" in the query
+                statement.setString(1, id);
 
-            // Set the parameter represented by "?" in the query to the id we get from url,
-            // num 1 indicates the first "?" in the query
-            statement.setString(1, id);
-
-            // Perform the query
-            ResultSet rs = statement.executeQuery();
-
-
-            out.beginArray();
-            while (rs.next())
-            {
-                // Create a JsonObject based on the data we retrieve from rs
-                out.beginObject();
-                out.name("movie_id").value(rs.getString("movieId"));
-                out.name("movie_title").value(rs.getString("title"));
-                out.name("movie_year").value(rs.getString("year"));
-                out.name("movie_director").value(rs.getString("director"));
-                out.name("movie_genre").value(rs.getString("genres"));
-                out.name("movie_stars").value(rs.getString("stars"));
-                out.name("movie_rating").value(rs.getString("rating"));
-                out.endObject();
+                // Perform the query
+                try (ResultSet rs = statement.executeQuery()) {
+                    out.beginArray();
+                    while (rs.next())
+                    {
+                        // Create a JsonObject based on the data we retrieve from rs
+                        out.beginObject();
+                        out.name("movie_id").value(rs.getString("movieId"));
+                        out.name("movie_title").value(rs.getString("title"));
+                        out.name("movie_year").value(rs.getString("year"));
+                        out.name("movie_director").value(rs.getString("director"));
+                        out.name("movie_genre").value(rs.getString("genres"));
+                        out.name("movie_stars").value(rs.getString("stars"));
+                        out.name("movie_rating").value(rs.getString("rating"));
+                        out.endObject();
+                    }
+                    out.endArray();
+                }
             }
-            out.endArray();
-
-            rs.close();
-            statement.close();
 
             // Set response status to 200 (OK)
             response.setStatus(200);

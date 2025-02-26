@@ -78,15 +78,13 @@ public class PaymentServlet extends HttpServlet
                 pstmt.setString(2, firstName);
                 pstmt.setString(3, lastName);
                 pstmt.setDate(4, java.sql.Date.valueOf(expirationDate));
-                ResultSet rs = pstmt.executeQuery();
-
-                if (!rs.next())
-                {
-                    sendErrorResponse(response, "Invalid payment details. Please check your credit card information.");
-                    return;
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (!rs.next())
+                    {
+                        sendErrorResponse(response, "Invalid payment details. Please check your credit card information.");
+                        return;
+                    }
                 }
-
-                rs.close();
             }
 
             //Retrieve the customer id based on the credit card they gave us
@@ -94,11 +92,11 @@ public class PaymentServlet extends HttpServlet
             int customerId = -1;
             try (PreparedStatement pstmt = conn.prepareStatement(customerQuery)) {
                 pstmt.setString(1, cardNumber);
-                ResultSet rs = pstmt.executeQuery();
-                if (rs.next()) {
-                    customerId = rs.getInt("id");
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        customerId = rs.getInt("id");
+                    }
                 }
-                rs.close();
             }
 
             if (customerId == -1) {
@@ -112,14 +110,14 @@ public class PaymentServlet extends HttpServlet
                 String movieQuery = "SELECT id FROM movies WHERE title = ?";
                 try (PreparedStatement pstmt = conn.prepareStatement(movieQuery)) {
                     pstmt.setString(1, title);
-                    ResultSet rs = pstmt.executeQuery();
-                    if (rs.next()) {
-                        movieIds.add(rs.getString("id"));
-                    } else {
-                        sendErrorResponse(response, "Movie not found: " + title);
-                        return;
+                    try (ResultSet rs = pstmt.executeQuery()) {
+                        if (rs.next()) {
+                            movieIds.add(rs.getString("id"));
+                        } else {
+                            sendErrorResponse(response, "Movie not found: " + title);
+                            return;
+                        }
                     }
-                    rs.close();
                 }
             }
 
