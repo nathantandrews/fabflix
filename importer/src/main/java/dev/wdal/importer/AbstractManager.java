@@ -5,21 +5,18 @@ import java.io.*;
 import java.sql.*;
 import java.util.Set;
 import java.util.HashSet;
-import java.lang.ref.Cleaner;
 
 public abstract class AbstractManager<T> {
 	protected PrintWriter insertionLog;
     protected Set<T> toInsert;
     protected Connection connection;
 	protected int lastId;
-    private static final Cleaner cleaner = Cleaner.create();
-    private final Cleaner.Cleanable cleanable;
 
 	protected void init() {
 	}
 
     protected AbstractManager() {
-        this.cleanable = cleaner.register(this, this::cleanup);
+        ImporterCleaner.getCleaner().register(this, this::cleanup);
 		try {
 			insertionLog = new PrintWriter(new FileOutputStream(getType() + "s_good.log"));
         }

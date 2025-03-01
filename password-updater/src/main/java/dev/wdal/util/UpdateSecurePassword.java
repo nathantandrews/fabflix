@@ -23,8 +23,8 @@ public class UpdateSecurePassword
     {
         try
         {
-            String loginUser = "ba914792";
-            String loginPasswd = "123";
+            String loginUser = "mytestuser";
+            String loginPasswd = "My6$Password";
             String loginUrl = "jdbc:mysql://localhost:3306/moviedb";
 
             Class.forName("com.mysql.cj.jdbc.Driver");

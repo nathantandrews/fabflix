@@ -6,15 +6,12 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
-import java.lang.ref.Cleaner;
 
 public class AbstractParser extends DefaultHandler {
     protected PrintWriter errorLog;
-    private static final Cleaner cleaner = Cleaner.create();
-    private final Cleaner.Cleanable cleanable;
     protected AbstractParser()
     {
-        this.cleanable = cleaner.register(this, this::cleanup);
+        ImporterCleaner.getCleaner().register(this, this::cleanup);
     }
     public void openLog(String filename)
     {
