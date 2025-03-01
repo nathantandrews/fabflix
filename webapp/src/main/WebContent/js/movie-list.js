@@ -110,7 +110,7 @@ function fetchMovies()
         method: "GET",
         data: constraints,
         success: (response) => {
-            displayMovies(response["totalMovies"], response["movies"]);
+            displayMovies(response["movieCount"], response["movies"]);
         },
         error: (xhr, status, error) => {
             console.error("Error fetching movies:", error);
@@ -145,12 +145,16 @@ function displayMovies(totalMovies, movies)
         }).slice(0, 3).join(", ");
 
         let color = getColorForRating(parseFloat(movie.rating));
+        let relevance = Math.round(parseFloat(movie.relevance) * 100);
 
         return `
             <div class="movie-card">
                 <h3 class="movie-title">
                     <a href="single-movie.html?id=${movie.id}">${movie.title}</a>
                 </h3>
+                <div>
+                    <strong>Relevance:</strong> ${relevance}%
+                </div>
                 <div>
                     <strong>Year:</strong> ${movie.year}
                 </div>
@@ -179,6 +183,7 @@ function displayMovies(totalMovies, movies)
 
 function paginationControls(totalMovies)
 {
+    console.log("totalMovies = " + totalMovies + "; moviesPerPage = " + parseInt(constraints["moviesPerPage"]));
     totalPages = Math.ceil(totalMovies / parseInt(constraints["moviesPerPage"]));
     let totalPagesSpan = $("#totalPages");
     let currentPage = parseInt(constraints["page"]);

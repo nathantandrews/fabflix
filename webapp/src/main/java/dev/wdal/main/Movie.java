@@ -13,6 +13,7 @@ public class Movie implements Serializable {
     private double cost;
     private String genres;
     private String stars;
+    private double relevance;
 
     public Movie() {
     }
@@ -89,5 +90,13 @@ public class Movie implements Serializable {
 
     public void setStars(String stars) {
         this.stars = stars;
+    }
+
+    public double getRelevance() {
+        return relevance;
+    }
+
+    public void setRelevance(double relevance) {
+        this.relevance = relevance;
     }
 }

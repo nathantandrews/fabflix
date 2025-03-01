@@ -3,6 +3,9 @@ package dev.wdal.main;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Scanner;
 import java.util.stream.Stream;
 
@@ -10,6 +13,8 @@ import java.util.stream.Stream;
 public class KeywordSearchServlet extends AbstractMovieListServlet {
     private static final long serialVersionUID = 2L;
     private static final String SERVICE_NAME = "keyword-search";
+    private String keywords;
+    private String queryTerms;
 
     @Override
     protected String getServiceName()
@@ -17,66 +22,80 @@ public class KeywordSearchServlet extends AbstractMovieListServlet {
         return SERVICE_NAME;
     }
 
-    private static final String COUNT_QUERY_START =
-        "SELECT COUNT(DISTINCT m.id) AS totalMovies " +
-                "FROM movies m " +
-                "LEFT JOIN genres_in_movies gm ON m.id = gm.movieId " +
-                "LEFT JOIN genres g ON gm.genreId = g.id " +
-                "LEFT JOIN stars_in_movies sm ON m.id = sm.movieId " +
-                "LEFT JOIN stars s ON sm.starId = s.id " +
-                "LEFT JOIN ratings r ON r.movieId = m.id ";
-    private static final String FETCH_QUERY_START =
-        "SELECT m.id, m.title, m.year, m.director, m.cost, " +
-                "GROUP_CONCAT(DISTINCT CONCAT(g.name, '(', g.id, ')') ORDER BY g.name SEPARATOR ',') as genres, " +
-                "GROUP_CONCAT(DISTINCT CONCAT(s.name, '(', s.id, ')') ORDER BY sc.movieCount DESC, s.name ASC SEPARATOR ',') as stars, " +
-                "r.rating " +
-                "FROM movies m " +
-                "LEFT JOIN genres_in_movies gm ON m.id = gm.movieId " +
-                "LEFT JOIN genres g ON gm.genreId = g.id " +
-                "LEFT JOIN stars_in_movies sm ON m.id = sm.movieId " +
-                "LEFT JOIN stars s ON sm.starId = s.id " +
-                "LEFT JOIN ratings r ON r.movieId = m.id " +
-                "LEFT JOIN (SELECT sim2.starId, COUNT(sim2.movieId) AS movieCount " +
-                "           FROM stars_in_movies sim2 " +
-                "           GROUP BY sim2.starId) AS sc ON sc.starId = sm.starId ";
+    // here order matters
+    private static final String FULL_QUERY = SearchUtils.RELEVANCE_CTE +
+        "SELECT m.id, title, m.year, director, cost, relevance, " +
+        "  GROUP_CONCAT(DISTINCT CONCAT(g.name, '(', g.id, ')') ORDER BY g.name SEPARATOR ',') as genres, " +
+        "  GROUP_CONCAT(DISTINCT CONCAT(s.name, '(', s.id, ')') ORDER BY sc.movieCount DESC, s.name ASC SEPARATOR ',') as stars, " +
+        "  r.rating " +
+        "FROM movies_scored AS m " +
+        "LEFT JOIN genres_in_movies gm ON m.id = gm.movieId " +
+        "LEFT JOIN genres g ON gm.genreId = g.id " +
+        "LEFT JOIN stars_in_movies sm ON m.id = sm.movieId " +
+        "LEFT JOIN stars s ON sm.starId = s.id " +
+        "LEFT JOIN ratings r ON r.movieId = m.id " +
+        "LEFT JOIN (SELECT sim2.starId, COUNT(sim2.movieId) AS movieCount " +
+        "           FROM stars_in_movies sim2 " +
+        "           GROUP BY sim2.starId) AS sc ON sc.starId = sm.starId " +
+        "WHERE relevance > 0 ";
 
-    private static final String FETCH_QUERY_GROUP_BY_CLAUSE =
-        "GROUP BY m.id, m.title, m.year, m.director, r.rating";
+    // @Override
+    // protected String buildCountQueryString()
+    // {
+    //     return buildQueryString(COUNT_QUERY_START, true, false, false, false);
+    // }
+
+    @Override
+    protected String buildFetchQueryString()
+    {
+        // constraints are built into the keyword-based FULL_QUERY already
+        return buildQueryString(FULL_QUERY, false, true, true, true);
+    }
+
+    private double maxFtsRelevance;
 
     @Override
     protected void setConstraints(HttpServletRequest request)
     {
         clearConstraints();
+        setConstraintJoiner("OR");
 
-        String keywords = request.getParameter("keywords");
+        keywords = request.getParameter("keywords");
         if (keywords != null && !keywords.isEmpty())
         {
             Scanner in = new Scanner(keywords);
             Stream<String> sin = in.tokens();
-            String queryTerms = sin.collect(StringBuilder::new, (sb, element) -> {
+            queryTerms = sin.collect(StringBuilder::new, (sb, element) -> {
                 sb.append("+").append(element).append("* "); }, StringBuilder::append).toString().trim();
             sin.close();
             in.close();
-            addConstraint("MATCH (m.title) AGAINST (? IN BOOLEAN MODE)", queryTerms);
             System.out.println(queryTerms);
         }
+
+        try
+        {
+            maxFtsRelevance = SearchUtils.computeMaxFtsRelevance(getConnection(), queryTerms);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+            maxFtsRelevance = 1.0;
+        }
+
+        addConstraint("title=?", keywords); // exact match constraint
+        addConstraint("MATCH (title) AGAINST (? IN BOOLEAN MODE)", queryTerms); // fts constraint
+        addConstraint("LOWER(title) LIKE LOWER(?)", keywords + "%"); // fuzzy a constraint
+        addConstraint("edth(LOWER(title), ?, ?)", keywords); // fuzzy b, needs threshold later
     }
 
-    @Override
-    protected String getCountQueryStart()
+    protected void setCountParameters(PreparedStatement ps) throws SQLException
     {
-        return COUNT_QUERY_START;
+        super.setCountParameters(ps);
+        ps.setInt(5, (int)(SearchUtils.ED_THRESHOLD * keywords.length())); // fuzzy b threshold
     }
 
-    @Override
-    protected String getFetchQueryStart()
+    protected void setFetchParameters(PreparedStatement ps) throws SQLException
     {
-        return FETCH_QUERY_START;
-    }
-
-    @Override
-    protected String getFetchQueryGroupByClause()
-    {
-        return FETCH_QUERY_GROUP_BY_CLAUSE;
+        SearchUtils.setFetchParameters(ps, keywords, queryTerms, SearchUtils.ED_THRESHOLD, maxFtsRelevance);
     }
 }

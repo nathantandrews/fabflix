@@ -14,6 +14,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.ParameterMetaData;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,11 +32,23 @@ public abstract class AbstractMovieListServlet extends HttpServlet {
     private int moviesPerPage;
     private String orderByClause;
     private int offset;
-    StringBuilder countQuery;
-    StringBuilder fetchQuery;
+
+    protected String getOrderByClause()
+    {
+        return orderByClause;
+    }
+
+    private String countQuery;
+    private String fetchQuery;
 
     private List<String> conditions;
     private List<Object> parameters;
+    private String constraintJoiner;
+
+    protected void setConstraintJoiner(String constraintJoiner)
+    {
+        this.constraintJoiner = constraintJoiner;
+    }
 
     private int totalMovieCount;
     private List<Movie> movies;
@@ -77,35 +90,58 @@ public abstract class AbstractMovieListServlet extends HttpServlet {
         addConstraint("LOWER(" + name + ") LIKE LOWER(?)", value + "%");
     }
 
-    private void applyConstraints()
+    protected void applyConstraints(StringBuilder query)
     {
         if (!conditions.isEmpty())
         {
-            String whereClause = " WHERE " + String.join(" AND ", conditions);
-            countQuery.append(whereClause);
-            fetchQuery.append(whereClause);
+            String whereClause = " WHERE " + String.join(" " + constraintJoiner + " ", conditions);
+            query.append(whereClause);
         }
     }
 
-    protected abstract String getCountQueryStart();
-    protected abstract String getFetchQueryStart();
-    protected abstract String getFetchQueryGroupByClause();
+    protected static final String MOVIE_COUNT = "movieCount";
+    // don't care about order here, just count with constraints
+    protected static final String COUNT_QUERY_START = "SELECT COUNT(DISTINCT id) AS " + MOVIE_COUNT + " FROM movies";
+
+    protected static final String GROUP_BY_CLAUSE = "GROUP BY m.id, title, m.year, director, cost, relevance, r.rating";
+
+    protected String buildQueryString(String start, boolean constrain, boolean group, boolean sort, boolean limit)
+    {
+        StringBuilder query = new StringBuilder(start);
+        if (constrain) { applyConstraints(query); }
+        if (group) { query.append(" " + GROUP_BY_CLAUSE + " "); }
+        if (sort) { query.append(getOrderByClause()); }
+        if (limit) { query.append(" LIMIT ? OFFSET ?"); }
+        query.append(";");
+        return query.toString();
+    }
+
+    protected String buildCountQueryString()
+    {
+        return buildQueryString(COUNT_QUERY_START, true, false, false, false);
+    }
+
+    protected abstract String buildFetchQueryString();
 
     private void buildQueries()
     {
-        countQuery = new StringBuilder(getCountQueryStart());
-        fetchQuery = new StringBuilder(getFetchQueryStart());
+        countQuery = buildCountQueryString();
+        System.out.println("count: " + countQuery);
+        fetchQuery = buildFetchQueryString();
+        System.out.println("fetch: " + fetchQuery);
+    }
 
-        applyConstraints();
+    private void setQueryParameters(PreparedStatement ps) throws SQLException
+    {
+        for (int i = 0; i < parameters.size(); i++)
+        {
+            ps.setObject(i + 1, parameters.get(i));
+        }
+    }
 
-        countQuery.append(";");
-        System.out.println("count: " + countQuery.toString());
-
-        fetchQuery.append(" " + getFetchQueryGroupByClause() + " ");
-        fetchQuery.append(orderByClause);
-        fetchQuery.append(" LIMIT ? OFFSET ?;");
-
-        System.out.println("fetch: " + fetchQuery.toString());
+    protected void setCountParameters(PreparedStatement ps) throws SQLException
+    {
+        setQueryParameters(ps);
     }
 
     private void countMovies() throws IOException, SQLException
@@ -113,30 +149,32 @@ public abstract class AbstractMovieListServlet extends HttpServlet {
         totalMovieCount = 0;
         try (PreparedStatement ps = getConnection().prepareStatement(countQuery.toString()))
         {
-            for (int i = 0; i < parameters.size(); i++)
-            {
-                ps.setObject(i + 1, parameters.get(i));
-            }
+            setCountParameters(ps);
             try (ResultSet rs = ps.executeQuery())
             {
                 if (rs.next())
                 {
-                    totalMovieCount = rs.getInt("totalMovies");
+                    totalMovieCount = rs.getInt(MOVIE_COUNT);
                 }
             }
         }
+        System.out.println("totalMovieCount = " + totalMovieCount);
+    }
+
+    protected void setFetchParameters(PreparedStatement ps) throws SQLException
+    {
+        setQueryParameters(ps);
     }
 
     private void getPaginatedMovies() throws IOException, SQLException
     {
         try (PreparedStatement ps = getConnection().prepareStatement(fetchQuery.toString()))
         {
-            for (int i = 0; i < parameters.size(); i++)
-            {
-                ps.setObject(i + 1, parameters.get(i));
-            }
-            ps.setInt(parameters.size() + 1, moviesPerPage);
-            ps.setInt(parameters.size() + 2, offset);
+            setFetchParameters(ps);
+            // limit params are always there
+            ParameterMetaData pm = ps.getParameterMetaData();
+            ps.setInt(pm.getParameterCount() - 1, moviesPerPage);
+            ps.setInt(pm.getParameterCount(), offset);
             ResultSet rs = ps.executeQuery();
             movies.clear();
             while (rs.next())
@@ -150,6 +188,7 @@ public abstract class AbstractMovieListServlet extends HttpServlet {
                 movie.setCost(rs.getDouble("cost"));
                 movie.setGenres(rs.getString("genres"));
                 movie.setStars(rs.getString("stars"));
+                movie.setRelevance(rs.getDouble("relevance"));
                 movies.add(movie);
             }
         }
@@ -160,7 +199,7 @@ public abstract class AbstractMovieListServlet extends HttpServlet {
         try (JsonWriter jsonWriter = new JsonWriter(response.getWriter()))
         {
             jsonWriter.beginObject();
-            jsonWriter.name("totalMovies").value(totalMovieCount);
+            jsonWriter.name(MOVIE_COUNT).value(totalMovieCount);
             jsonWriter.name("movies").beginArray();
             for (Movie m : movies)
             {
@@ -173,6 +212,7 @@ public abstract class AbstractMovieListServlet extends HttpServlet {
                 jsonWriter.name("cost").value(m.getCost());
                 jsonWriter.name("genres").value(m.getGenres());
                 jsonWriter.name("stars").value(m.getStars());
+                jsonWriter.name("relevance").value(m.getRelevance());
                 jsonWriter.endObject();
             }
             jsonWriter.endArray();
@@ -188,29 +228,32 @@ public abstract class AbstractMovieListServlet extends HttpServlet {
         orderByClause = "ORDER BY ";
         switch (sortBy)
         {
+            case "relevance-desc-title-asc":
+                orderByClause += "relevance DESC, title ASC, m.year DESC";
+                break;
             case "title-asc-rating-asc":
-                orderByClause += "m.title ASC, r.rating ASC";
+                orderByClause += "title ASC, r.rating ASC";
                 break;
             case "title-asc-rating-desc":
-                orderByClause += "m.title ASC, r.rating DESC";
+                orderByClause += "title ASC, r.rating DESC";
                 break;
             case "title-desc-rating-desc":
-                orderByClause += "m.title DESC, r.rating DESC";
+                orderByClause += "title DESC, r.rating DESC";
                 break;
             case "title-desc-rating-asc":
-                orderByClause += "m.title DESC, r.rating ASC";
+                orderByClause += "title DESC, r.rating ASC";
                 break;
             case "rating-asc-title-asc":
-                orderByClause += "r.rating ASC, m.title ASC";
+                orderByClause += "r.rating ASC, title ASC";
                 break;
             case "rating-asc-title-desc":
-                orderByClause += "r.rating ASC, m.title DESC";
+                orderByClause += "r.rating ASC, title DESC";
                 break;
             case "rating-desc-title-desc":
-                orderByClause += "r.rating DESC, m.title DESC";
+                orderByClause += "r.rating DESC, title DESC";
                 break;
             case "rating-desc-title-asc":
-                orderByClause += "r.rating DESC, m.title ASC";
+                orderByClause += "r.rating DESC, title ASC";
                 break;
             default:
                 throw new IllegalArgumentException("sortBy invalid");

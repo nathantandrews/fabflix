@@ -31,6 +31,7 @@ function submitFts()
     if (!getFormResults(queryParamsDict)) { return; }
     getDefaultConstraints(queryParamsDict);
     queryParamsDict["action"] = "keyword-search";
+    queryParamsDict["sortBy"] = "relevance-desc-title-asc";
     sessionStorage.removeItem("lastMovieListURL");
 
     let queryString = getQueryString(queryParamsDict);

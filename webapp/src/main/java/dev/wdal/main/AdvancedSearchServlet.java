@@ -14,19 +14,11 @@ public class AdvancedSearchServlet extends AbstractMovieListServlet {
         return SERVICE_NAME;
     }
 
-    private static final String COUNT_QUERY_START =
-        "SELECT COUNT(DISTINCT m.id) AS totalMovies " +
-                "FROM movies m " +
-                "LEFT JOIN genres_in_movies gm ON m.id = gm.movieId " +
-                "LEFT JOIN genres g ON gm.genreId = g.id " +
-                "LEFT JOIN stars_in_movies sm ON m.id = sm.movieId " +
-                "LEFT JOIN stars s ON sm.starId = s.id " +
-                "LEFT JOIN ratings r ON r.movieId = m.id";
     private static final String FETCH_QUERY_START =
-        "SELECT m.id, m.title, m.year, m.director, m.cost, " +
+        "SELECT m.id, title, m.year, director, cost, " +
                 "GROUP_CONCAT(DISTINCT CONCAT(g.name, '(', g.id, ')') ORDER BY g.name SEPARATOR ',') as genres, " +
                 "GROUP_CONCAT(DISTINCT CONCAT(s.name, '(', s.id, ')') ORDER BY sc.movieCount DESC, s.name ASC SEPARATOR ',') as stars, " +
-                "r.rating " +
+                "r.rating, " + SearchUtils.FUZZ_A_CONTRIB_FACTOR + " AS relevance " +
                 "FROM movies m " +
                 "LEFT JOIN genres_in_movies gm ON m.id = gm.movieId " +
                 "LEFT JOIN genres g ON gm.genreId = g.id " +
@@ -36,9 +28,14 @@ public class AdvancedSearchServlet extends AbstractMovieListServlet {
                 "LEFT JOIN (SELECT sim2.starId, COUNT(sim2.movieId) AS movieCount " +
                 "           FROM stars_in_movies sim2 " +
                 "           GROUP BY sim2.starId) AS sc ON sc.starId = sm.starId";
-    private static final String FETCH_QUERY_GROUP_BY_CLAUSE =
-        "GROUP BY m.id, m.title, m.year, m.director, r.rating";
 
+    @Override
+    protected String buildFetchQueryString()
+    {
+        // constraints are built into the keyword-based FULL_QUERY already
+        return buildQueryString(FETCH_QUERY_START, true, true, true, true);
+    }
+            
     protected void addTitleConstraint(HttpServletRequest request)
     {
         String title = request.getParameter("title");
@@ -46,11 +43,11 @@ public class AdvancedSearchServlet extends AbstractMovieListServlet {
         {
             if (title.equals("*"))
             {
-                addConstraint("LOWER(m.title) REGEXP ?", "^[^a-zA-Z0-9]");
+                addConstraint("LOWER(title) REGEXP ?", "^[^a-zA-Z0-9]");
             }
             else
             {
-                addLikeConstraint("m.title", title);
+                addLikeConstraint("title", title);
             }
         }
     }
@@ -59,18 +56,20 @@ public class AdvancedSearchServlet extends AbstractMovieListServlet {
     protected void setConstraints(HttpServletRequest request)
     {
         clearConstraints();
+        setConstraintJoiner("AND");
+
+        addTitleConstraint(request);
+
         String year = request.getParameter("year");
         if (year != null && !year.isEmpty())
         {
             addConstraint("m.year = ?", year);
         }
 
-        addTitleConstraint(request);
-
         String director = request.getParameter("director");
         if (director != null && !director.isEmpty())
         {
-            addLikeConstraint("m.director", director);
+            addLikeConstraint("director", director);
         }
 
         String star = request.getParameter("star");
@@ -78,23 +77,5 @@ public class AdvancedSearchServlet extends AbstractMovieListServlet {
         {
             addLikeConstraint("s.name", star);
         }
-    }
-
-    @Override
-    protected String getCountQueryStart()
-    {
-        return COUNT_QUERY_START;
-    }
-
-    @Override
-    protected String getFetchQueryStart()
-    {
-        return FETCH_QUERY_START;
-    }
-
-    @Override
-    protected String getFetchQueryGroupByClause()
-    {
-        return FETCH_QUERY_GROUP_BY_CLAUSE;
     }
 }

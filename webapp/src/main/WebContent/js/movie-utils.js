@@ -13,8 +13,8 @@ function getQueryString(queryParamsDict)
 function getDefaultConstraints(queryParamsDict)
 {
     const sortBy = "rating-desc-title-asc";
-    const moviesPerPage = 10;
-    const page = 1;
+    const moviesPerPage = "10";
+    const page = "1";
     queryParamsDict["sortBy"] = sortBy;
     queryParamsDict["moviesPerPage"] = moviesPerPage;
     queryParamsDict["page"] = page;

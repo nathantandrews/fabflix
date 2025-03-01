@@ -2,7 +2,7 @@
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
          version="3.1">
-    <display-name>cs122b-winter25-wedontattendlecture</display-name>
+    <display-name>fabflix</display-name>
     <welcome-file-list>
         <welcome-file>index.html</welcome-file>
     </welcome-file-list>
@@ -14,9 +14,9 @@
         <res-type>javax.sql.DataSource</res-type>
         <res-auth>Container</res-auth>
     </resource-ref>
-    <listener>
+    <!-- <listener>
         <listener-class>dev.wdal.main.JdbcFinalizer</listener-class>
-    </listener>
+    </listener> -->
     <security-constraint>
         <web-resource-collection>
             <web-resource-name>HTTPSOnly</web-resource-name>
@@ -26,12 +26,4 @@
             <transport-guarantee>CONFIDENTIAL</transport-guarantee>
         </user-data-constraint>
     </security-constraint>
-    <!--filter>
-        <filter-name>HtmlExtensionFilter</filter-name>
-        <filter-class>HtmlExtensionFilter</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>HtmlExtensionFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping-->
 </web-app>

@@ -31,7 +31,7 @@ public class MovieSuggestionServlet extends HttpServlet
         try (JsonWriter jw = new JsonWriter(response.getWriter()))
         {
             String queryString = request.getParameter("query");
-            FtsUtils.search(dataSource, queryString, jw, true);
+            SearchUtils.search(dataSource, queryString, jw);
         }
         catch (Exception e)
         {

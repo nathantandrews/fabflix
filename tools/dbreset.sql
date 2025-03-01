@@ -26,3 +26,4 @@ SELECT COUNT(*) FROM stars;
 SELECT COUNT(*) FROM movies;
 SELECT COUNT(*) FROM genres_in_movies;
 SELECT COUNT(*) FROM stars_in_movies;
+SELECT COUNT(*) FROM customers;
