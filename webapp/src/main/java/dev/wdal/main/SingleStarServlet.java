@@ -30,7 +30,7 @@ public class SingleStarServlet extends HttpServlet
     {
         try
         {
-            dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedb");
+            dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedb_ro");
         }
         catch (NamingException e)
         {

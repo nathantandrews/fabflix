@@ -1,37 +1,51 @@
 ## CS 122B Project 4
-DEMO YOUTUBE LINK: https://youtu.be/gAr7JOLEzjY
+- # General
+    - #### Team#:
+        - #### wedontattendlecture
+    - #### Names:
+        - #### Nathan
+    - #### Project 5 Video Demo Link:
+        
+    - #### Instruction of deployment:
+        
+    - #### Collaborations and Work Distribution:
+        Nathan - Everything
 
+- # Connection Pooling
+    - #### Include the filename/path of all code/configuration files in GitHub of using JDBC Connection Pooling.
+        - #### webapp/src/main/java/dev/wdal/dashboard/auth/DashboardLoginServlet.java
+        - #### webapp/src/main/java/dev/wdal/dashboard/AddMovieServlet.java
+        - #### webapp/src/main/java/dev/wdal/dashboard/AddStarServlet.java
+        - #### webapp/src/main/java/dev/wdal/dashboard/DatabaseMetadataServlet.java
+        - #### webapp/src/main/java/dev/wdal/main/auth/LoginServlet.java
+        - #### webapp/src/main/java/dev/wdal/main/BrowsingServlet.java
+        - #### webapp/src/main/java/dev/wdal/main/CartServlet.java
+        - #### webapp/src/main/java/dev/wdal/main/MovieListServlet.java
+        - #### webapp/src/main/java/dev/wdal/main/MovieSuggestionServlet.java
+        - #### webapp/src/main/java/dev/wdal/main/PaymentServlet.java
+        - #### webapp/src/main/java/dev/wdal/main/SingleMovieServlet.java
+        - #### webapp/src/main/java/dev/wdal/main/SingleStarServlet.java
+        - #### webapp/src/main/WebContent/META-INF/context.xml
+    - #### Explain how Connection Pooling is utilized in the Fabflix code.
+        - #### We use a context-defined datasource that uses the pooling factory.
+    - #### Explain how Connection Pooling works with two backend SQL.
+        - #### Each webapp instance has two datasources, each datasource has its own pool.
 
-Prepared Statements and JDBC Connection Pooling Filenames:
-- webapp/src/main/java/dev/wdal/dashboard/auth/DashboardLoginServlet.java
-- webapp/src/main/java/dev/wdal/dashboard/AddMovieServlet.java
-- webapp/src/main/java/dev/wdal/dashboard/AddStarServlet.java
-- webapp/src/main/java/dev/wdal/dashboard/DatabaseMetadataServlet.java
-- webapp/src/main/java/dev/wdal/main/auth/LoginServlet.java
-- webapp/src/main/java/dev/wdal/main/BrowsingServlet.java
-- webapp/src/main/java/dev/wdal/main/CartServlet.java
-- webapp/src/main/java/dev/wdal/main/MovieListServlet.java
-- webapp/src/main/java/dev/wdal/main/MovieSuggestionServlet.java
-- webapp/src/main/java/dev/wdal/main/PaymentServlet.java
-- webapp/src/main/java/dev/wdal/main/SingleMovieServlet.java
-- webapp/src/main/java/dev/wdal/main/SingleStarServlet.java
-  
-Only PreparedStatements:
-- importer/src/main/java/dev/wdal/importer/AbstractManager.java and its derived classes
-
-Parsing Time Optimization Strategies:
-- Database Cache for quicker checking of duplicates
-- LOAD DATA statement with .csv files
-- ended up taking around 30 seconds compared to 15-20 minutes
-
-Inconsistency Reports:
-- genres_errors.log
-- movies_errors.log
-- stars_errors.log
-- stars_in_movies_errors.log
-
-All Inconsistency Reports are shown in the demo, and are placed at the root of the repository when parsing.
-
-Contributions:
-
-    Everything - Nathan
+- # Master/Slave
+    - #### Include the filename/path of all code/configuration files in GitHub of routing queries to Master/Slave SQL.
+        - #### webapp/src/main/java/dev/wdal/dashboard/auth/DashboardLoginServlet.java
+        - #### webapp/src/main/java/dev/wdal/dashboard/AddMovieServlet.java
+        - #### webapp/src/main/java/dev/wdal/dashboard/AddStarServlet.java
+        - #### webapp/src/main/java/dev/wdal/dashboard/DatabaseMetadataServlet.java
+        - #### webapp/src/main/java/dev/wdal/main/auth/LoginServlet.java
+        - #### webapp/src/main/java/dev/wdal/main/BrowsingServlet.java
+        - #### webapp/src/main/java/dev/wdal/main/CartServlet.java
+        - #### webapp/src/main/java/dev/wdal/main/MovieListServlet.java
+        - #### webapp/src/main/java/dev/wdal/main/MovieSuggestionServlet.java
+        - #### webapp/src/main/java/dev/wdal/main/PaymentServlet.java
+        - #### webapp/src/main/java/dev/wdal/main/SingleMovieServlet.java
+        - #### webapp/src/main/java/dev/wdal/main/SingleStarServlet.java
+        - #### webapp/src/main/WebContent/META-INF/context.xml
+    - #### How read/write requests were routed to Master/Slave SQL?
+        - #### If the load balancer selects the master instance, all read and write only SQL statements are routed to the master.
+        - #### If the load balancer selects the slave instance, all read only SQL statments are routed to the slave, while all the write only SQL statments are routed to the master.

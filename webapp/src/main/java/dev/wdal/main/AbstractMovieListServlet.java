@@ -57,7 +57,7 @@ public abstract class AbstractMovieListServlet extends HttpServlet {
 
     public void init(ServletConfig config) {
         try {
-            dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedb");
+            dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedb_ro");
             conditions = new ArrayList<>();
             parameters = new ArrayList<>();
             movies = new ArrayList<>();
