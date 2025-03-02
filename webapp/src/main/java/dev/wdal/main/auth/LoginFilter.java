@@ -40,7 +40,7 @@ public class LoginFilter implements Filter
         if (httpRequest.getSession().getAttribute("user") == null)
         {
             System.out.println("LoginFilter blocking: " + httpRequest.getRequestURI());
-            httpResponse.sendRedirect(this.contextPath);
+            httpResponse.sendRedirect(this.contextPath + "/");
         }
         else
         {

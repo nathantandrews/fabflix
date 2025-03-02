@@ -40,7 +40,7 @@ public class DashboardLoginFilter implements Filter
         if (httpRequest.getSession().getAttribute("employee") == null)
         {
             System.out.println("DashboardLoginFilter blocking: " + httpRequest.getRequestURI());
-            httpResponse.sendRedirect(this.contextPath);
+            httpResponse.sendRedirect(this.contextPath + "/");
         }
         else
         {
