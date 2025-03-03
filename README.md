@@ -5,7 +5,7 @@
     - #### Names:
         - #### Nathan
     - #### Project 5 Video Demo Link:
-      https://youtu.be/xUzBnex1jYU
+      https://youtu.be/Z7_pA2kXItw
 - #### Instruction of deployment:
   - #### make an image of the slave,
     - #### make sure the slave replication is stopped first
