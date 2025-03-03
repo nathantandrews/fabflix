@@ -5,11 +5,55 @@
     - #### Names:
         - #### Nathan
     - #### Project 5 Video Demo Link:
-        
-    - #### Instruction of deployment:
-        
-    - #### Collaborations and Work Distribution:
-        Nathan - Everything
+      https://youtu.be/xUzBnex1jYU
+- #### Instruction of deployment:
+  - #### make an image of the slave,
+    - #### make sure the slave replication is stopped first
+  - #### after image creation...
+    - #### select launch instance from image button
+    - #### name the instance
+    - #### select number of instances: 1
+    - #### go to My AMIs, select correct AMI
+    - #### ensure instance type is the same as master
+    - #### ensure key is the same as master (select from dropdown)
+    - #### select "existing security group"
+    - #### ensure security group is the same as master (select from dropdown)
+    - #### press the launch instance button
+  - #### wait for instance to initialize
+    - #### edit inbound rules of master's security group to allow port 8080 and port 3306 for this instance's private ip
+    - #### ssh onto master
+      - #### ssh -i "cs122b-fabflix-final-key.pem" ubuntu@ec2-54-177-199-119.us-west-1.compute.amazonaws.com
+      - #### show its status to grab the file and position columns and save them to a text file
+        - #### sudo mysql
+        - #### show master status;
+    - #### ssh into instance using key and public ip
+      - #### delete the uuid for MySQL
+        - #### sudo rm /var/lib/mysql/auto.cnf
+      - #### set the serverId to 3
+        - #### sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
+      - #### restart MySQL service
+        - #### sudo systemctl restart mysql
+      - #### sudo mysql
+        - #### stop slave;
+        - #### reset slave;
+        - #### run the command to change master using the master's private ip, log file, position, and the user and password used for other slaves
+          - #### CHANGE MASTER TO MASTER_HOST='172.31.12.216', MASTER_USER='repl', MASTER_PASSWORD='slave66Pass$word', MASTER_LOG_FILE='mysql-bin.000004', MASTER_LOG_POS=157;
+        - #### start slave;
+        - #### show slave status;
+    - #### ssh onto AWS load balancer
+      - #### ssh -i "cs122b-fabflix-final-key.pem" ubuntu@ec2-54-183-88-74.us-west-1.compute.amazonaws.com
+      - #### add slave ip to AWS load balancer 
+      - #### restart apache2
+    - #### ssh onto GCP load balancer
+      - #### use browser
+      - #### add slave ip to AWS load balancer
+      - #### restart apache2
+
+      - #### Collaborations and Work Distribution:
+      Nathan - Everything
+
+- # Fuzzy Search Implementation
+  - #### The threshold for fuzzy search is normalized by multiplying .5 times the title length and then using that as the threshold for the edth function. Then I used the ed function to sort the results. I tried to use .2 as the multiple instead of .5, but i wasn't getting any results, so I kept testing and increasing till .5 gave good consistent results.
 
 - # Connection Pooling
     - #### Include the filename/path of all code/configuration files in GitHub of using JDBC Connection Pooling.
@@ -29,7 +73,7 @@
     - #### Explain how Connection Pooling is utilized in the Fabflix code.
         - #### We use a context-defined datasource that uses the pooling factory.
     - #### Explain how Connection Pooling works with two backend SQL.
-        - #### Each webapp instance has two datasources, each datasource has its own pool.
+        - #### Each webapp instance has two datasources (moviedb_rw -> master and moviedb_ro -> localhost), each datasource has its own pool.
 
 - # Master/Slave
     - #### Include the filename/path of all code/configuration files in GitHub of routing queries to Master/Slave SQL.
