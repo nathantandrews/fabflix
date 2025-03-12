@@ -40,7 +40,6 @@ primary:
     socket=/opt/bitnami/mysql/tmp/mysql.sock
     default-character-set=UTF8
     plugin_dir=/opt/bitnami/mysql/lib/plugin:/tmp/mysql-extras/plugins
-    local-infile=1
 
     [mysql]
     local-infile=1
