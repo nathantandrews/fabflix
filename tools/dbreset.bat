@@ -1,3 +1,3 @@
-dataxf.bat ..\..\fabflix-meta\movie-data.sql
+@REM dataxf.bat ..\..\fabflix-meta\movie-data.sql
 mysql -u mytestuser --password=My6$Password < dbreset.sql
-java -jar ../password-updater/target/fabflix-password-updater-jar-with-dependencies.jar
+@REM java -jar ../password-updater/target/fabflix-password-updater-jar-with-dependencies.jar
