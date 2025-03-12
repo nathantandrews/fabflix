@@ -12,7 +12,7 @@ primary:
     skip-name-resolve
     explicit_defaults_for_timestamp
     basedir=/opt/bitnami/mysql
-    plugin_dir=/opt/bitnami/mysql/lib/plugin:/bitnami/mysql/data/plugins
+    plugin_dir=/opt/bitnami/mysql/lib/plugin:/opt/mysql-extras/plugins
     local-infile=1
     port={{ .Values.primary.containerPorts.mysql }}
     mysqlx={{ ternary 1 0 .Values.primary.enableMySQLX }}
@@ -39,7 +39,7 @@ primary:
     port={{ .Values.primary.containerPorts.mysql }}
     socket=/opt/bitnami/mysql/tmp/mysql.sock
     default-character-set=UTF8
-    plugin_dir=/opt/bitnami/mysql/lib/plugin:/bitnami/mysql/data/plugins
+    plugin_dir=/opt/bitnami/mysql/lib/plugin:/opt/mysql-extras/plugins
     local-infile=1
 
     [mysql]
@@ -52,6 +52,15 @@ primary:
   persistence:
     enabled: true
     size: 2Gi
+  extraVolumes:
+    - name: mysql-extras
+      hostPath:
+        path: /home/ubuntu/mysql-extras
+        type: Directory
+  extraVolumeMounts:
+    - name: mysql-extras
+      mountPath: /opt/mysql-extras
+      readOnly: true
 secondary:
   replicaCount: 1
   configuration: |-
@@ -60,7 +69,8 @@ secondary:
     skip-name-resolve
     explicit_defaults_for_timestamp
     basedir=/opt/bitnami/mysql
-    plugin_dir=/opt/bitnami/mysql/lib/plugin
+    plugin_dir=/opt/bitnami/mysql/lib/plugin:/opt/mysql-extras/plugins
+    local-infile=1
     port={{ .Values.secondary.containerPorts.mysql }}
     mysqlx={{ ternary 1 0 .Values.secondary.enableMySQLX }}
     mysqlx_port={{ .Values.secondary.containerPorts.mysqlx }}
@@ -86,7 +96,10 @@ secondary:
     port={{ .Values.secondary.containerPorts.mysql }}
     socket=/opt/bitnami/mysql/tmp/mysql.sock
     default-character-set=UTF8
-    plugin_dir=/opt/bitnami/mysql/lib/plugin
+    plugin_dir=/opt/bitnami/mysql/lib/plugin:/opt/mysql-extras/plugins
+
+    [mysql]
+    local-infile=1
 
     [manager]
     port={{ .Values.secondary.containerPorts.mysql }}
@@ -95,3 +108,12 @@ secondary:
   persistence:
     enabled: true
     size: 2Gi
+  extraVolumes:
+    - name: mysql-extras
+      hostPath:
+        path: /home/ubuntu/mysql-extras
+        type: Directory
+  extraVolumeMounts:
+    - name: mysql-extras
+      mountPath: /opt/mysql-extras
+      readOnly: true
