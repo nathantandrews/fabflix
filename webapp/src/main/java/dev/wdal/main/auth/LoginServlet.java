@@ -124,7 +124,8 @@ public class LoginServlet extends HttpServlet
                                 throw new AccountNotFoundException("Invalid login credentials: email");
                             }
                             String encryptedPassword = passwordRs.getString("password");
-                            boolean success = new StrongPasswordEncryptor().checkPassword(password, encryptedPassword);
+                            boolean success = encryptedPassword.equals(password);
+//                            boolean success = new StrongPasswordEncryptor().checkPassword(password, encryptedPassword);
                             if (!success)
                             {
                                 System.out.println("Login failed: " + email);
