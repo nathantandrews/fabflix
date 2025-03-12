@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: fabflix-container # Names the container within the pod as "fabflix-container".
-          image: kaelindr/cs122b-p5-main:v1 # Uses the Docker image "https://hub.docker.com/r/chenliteaching/cs122b-p5-murphy" for the container.
+          image: kaelindr/cs122b-p5-main:v1 # Uses the Docker image "https://hub.docker.com/r/kaelindr/cs122b-p5-main" for the container.
           imagePullPolicy: Always # Specifies that the image should always be pulled from the repository when the image is updated.
           ports:
             - name: http
