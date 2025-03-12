@@ -43,28 +43,28 @@ public class LoginServlet extends HttpServlet
         jo.addProperty("message", message);
     }
 
-    protected void doRecaptcha(HttpServletRequest request) throws LoginException
-    {
-        String gRecaptchaResponse = request.getParameter("g-recaptcha-response");
-        if (gRecaptchaResponse == null || gRecaptchaResponse.isEmpty())
-        {
-            gRecaptchaResponse = (String)request.getSession().getAttribute("gRecaptchaResponse");
-            if (gRecaptchaResponse == null || gRecaptchaResponse.isEmpty())
-            {
-                throw new CredentialNotFoundException("Recaptcha verification failed.");
-            }
-        }
-        System.out.println("gRecaptchaResponse=" + gRecaptchaResponse);
-        request.getSession().setAttribute("gRecaptchaResponse", gRecaptchaResponse);
-        try
-        {
-            RecaptchaVerifyUtils.verify(gRecaptchaResponse);
-        }
-        catch (Exception e)
-        {
-            throw new FailedLoginException("Recaptcha verification failed.");
-        }
-    }
+//    protected void doRecaptcha(HttpServletRequest request) throws LoginException
+//    {
+//        String gRecaptchaResponse = request.getParameter("g-recaptcha-response");
+//        if (gRecaptchaResponse == null || gRecaptchaResponse.isEmpty())
+//        {
+//            gRecaptchaResponse = (String)request.getSession().getAttribute("gRecaptchaResponse");
+//            if (gRecaptchaResponse == null || gRecaptchaResponse.isEmpty())
+//            {
+//                throw new CredentialNotFoundException("Recaptcha verification failed.");
+//            }
+//        }
+//        System.out.println("gRecaptchaResponse=" + gRecaptchaResponse);
+//        request.getSession().setAttribute("gRecaptchaResponse", gRecaptchaResponse);
+//        try
+//        {
+//            RecaptchaVerifyUtils.verify(gRecaptchaResponse);
+//        }
+//        catch (Exception e)
+//        {
+//            throw new FailedLoginException("Recaptcha verification failed.");
+//        }
+//    }
 
     protected void doBasicCredChecks(String email, String password) throws LoginException
     {
@@ -99,7 +99,7 @@ public class LoginServlet extends HttpServlet
 
             try
             {
-                doRecaptcha(request);
+//                doRecaptcha(request);
                 String email = request.getParameter("email");
                 String password = request.getParameter("password");
                 doBasicCredChecks(email, password);
