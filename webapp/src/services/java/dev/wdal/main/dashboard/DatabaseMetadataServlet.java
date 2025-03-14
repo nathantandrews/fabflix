@@ -1,4 +1,4 @@
-package dev.wdal.dashboard;
+package dev.wdal.main.dashboard;
 
 import com.google.gson.stream.JsonWriter;
 import jakarta.servlet.ServletConfig;

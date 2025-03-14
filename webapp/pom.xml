@@ -34,10 +34,25 @@
             <artifactId>jasypt</artifactId>
             <version>1.9.3</version>
         </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.11.5</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.11.5</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.11.5</version>
+        </dependency>
     </dependencies>
     <build>
         <finalName>fabflix</finalName>
-        <sourceDirectory>src/main/java</sourceDirectory>
+        <sourceDirectory>${src.dir}</sourceDirectory>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -52,7 +67,9 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <version>3.4.0</version>
                 <configuration>
-                    <warSourceDirectory>src/main/WebContent</warSourceDirectory>
+                    <warSourceDirectory>src/WebContent</warSourceDirectory>
+                    <warSourceIncludes>${includes}</warSourceIncludes>
+                    <warSourceExcludes>${excludes}</warSourceExcludes>
                 </configuration>
             </plugin>
             <plugin>
@@ -64,6 +81,52 @@
                     <path>/fabflix</path>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>add-common-resources</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>src/common/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>login</id>
+            <properties>
+                <src.dir>src/services/java/dev/wdal/auth</src.dir>
+                <includes>index.html,_dashboard/index.html,js/login.js,_dashboard/js/login.js,
+                    META-INF/context.xml,META-INF/MANIFEST.MF,WEB-INF/web.xml,css/styles.css,images/favicon.ico</includes>
+                <excludes/>
+            </properties>
+        </profile>
+        <profile>
+            <id>movies</id>
+            <properties>
+                <src.dir>src/services/java/dev/wdal/main</src.dir>
+                <includes>**</includes>
+                <excludes>index.html,_dashboard/index.html,js/login.js,_dashboard/js/login.js</excludes>
+            </properties>
+        </profile>
+        <profile>
+            <id>default</id>
+            <properties>
+                <src.dir>src/services/java</src.dir>
+                <includes>**</includes>
+                <excludes/>
+            </properties>
+        </profile>
+    </profiles>
 </project>

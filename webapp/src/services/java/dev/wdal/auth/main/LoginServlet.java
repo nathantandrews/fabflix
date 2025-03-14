@@ -1,22 +1,27 @@
-package dev.wdal.main.auth;
+package dev.wdal.auth.main;
 
+import dev.wdal.common.auth.User;
 import com.google.gson.JsonObject;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.jasypt.util.password.StrongPasswordEncryptor;
+//import org.jasypt.util.password.StrongPasswordEncryptor;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.AccountNotFoundException;
-import javax.security.auth.login.CredentialNotFoundException;
+//import javax.security.auth.login.CredentialNotFoundException;
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.HashMap;
 import java.util.Objects;
+
+import static dev.wdal.common.auth.JwtUtil.generateToken;
+import static dev.wdal.common.auth.JwtUtil.updateJwtCookie;
 
 @WebServlet(name = "LoginServlet", urlPatterns = "/api/login")
 public class LoginServlet extends HttpServlet
@@ -134,6 +139,10 @@ public class LoginServlet extends HttpServlet
                             // Login success:
                             // set this user into the session
                             request.getSession().setAttribute("user", new User(email));
+                            HashMap<String, Object> hm = new HashMap<>();
+                            hm.put("email", email);
+                            hm.put("userType", "customer");
+                            updateJwtCookie(request, response, generateToken(emailRs.getString("id"), hm));
 
                             jsonObj.addProperty("status", "success");
                             jsonObj.addProperty("message", "login success");

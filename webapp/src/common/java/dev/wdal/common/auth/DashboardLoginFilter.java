@@ -1,11 +1,15 @@
-package dev.wdal.dashboard.auth;
+package dev.wdal.common.auth;
 
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+
+import static dev.wdal.common.auth.JwtUtil.getCookieValue;
+import static dev.wdal.common.auth.JwtUtil.validateToken;
 
 /**
  * Servlet Filter implementation class LoginFilter
@@ -37,7 +41,8 @@ public class DashboardLoginFilter implements Filter
         }
 
         // Redirect to login page if the "user" attribute doesn't exist in session
-        if (httpRequest.getSession().getAttribute("employee") == null)
+        Claims claims = validateToken(getCookieValue(httpRequest, "jwtToken"));
+        if (claims == null || !claims.get("userType").equals("employee"))
         {
             System.out.println("DashboardLoginFilter blocking: " + httpRequest.getRequestURI());
             httpResponse.sendRedirect(this.contextPath + "/");

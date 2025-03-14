@@ -1,25 +1,26 @@
-package dev.wdal.dashboard.auth;
+package dev.wdal.auth.dashboard;
 
-import dev.wdal.main.auth.User;
+import dev.wdal.common.auth.User;
 // import dev.wdal.main.auth.RecaptchaConstants;
-import dev.wdal.main.auth.RecaptchaVerifyUtils;
 import com.google.gson.JsonObject;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.jasypt.util.password.StrongPasswordEncryptor;
 
 import javax.security.auth.login.LoginException;
 import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.AccountNotFoundException;
-import javax.security.auth.login.CredentialNotFoundException;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.HashMap;
 import java.util.Objects;
+
+import static dev.wdal.common.auth.JwtUtil.generateToken;
+import static dev.wdal.common.auth.JwtUtil.updateJwtCookie;
 
 @WebServlet(name = "DashboardLoginServlet", urlPatterns = "/_dashboard/api/login")
 public class DashboardLoginServlet extends HttpServlet
@@ -137,8 +138,13 @@ public class DashboardLoginServlet extends HttpServlet
                             // Login success:
                             // set this user into the session
                             User user = new User(email);
-                            request.getSession().setAttribute("user", user);
-                            request.getSession().setAttribute("employee", user);
+//                            request.getSession().setAttribute("user", user);
+//                            request.getSession().setAttribute("employee", user);
+                            HashMap<String, Object> hm = new HashMap<>();
+                            hm.put("email", email);
+                            hm.put("userType", "employee");
+                            updateJwtCookie(request, response, generateToken(emailRs.getString("fullname"), hm));
+
 
                             jsonObj.addProperty("status", "success");
                             jsonObj.addProperty("message", "login success");
