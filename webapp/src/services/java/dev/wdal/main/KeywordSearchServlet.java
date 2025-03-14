@@ -83,16 +83,16 @@ public class KeywordSearchServlet extends AbstractMovieListServlet {
 
         addConstraint("title=?", keywords); // exact match constraint
         addConstraint("MATCH (title) AGAINST (? IN BOOLEAN MODE)", queryTerms); // fts constraint
-        addConstraint("LOWER(title) LIKE LOWER(?)", keywords + "%"); // fuzzy a constraint
-        addConstraint("edth(LOWER(title), ?, ?)", keywords); // fuzzy b, needs threshold later
+//        addConstraint("LOWER(title) LIKE LOWER(?)", keywords + "%"); // fuzzy a constraint
+//        addConstraint("edth(LOWER(title), ?, ?)", keywords); // fuzzy b, needs threshold later
     }
-
-    protected void setCountParameters(PreparedStatement ps) throws SQLException
-    {
-        super.setCountParameters(ps);
-        ps.setInt(5, (int)(SearchUtils.ED_THRESHOLD * keywords.length())); // fuzzy b threshold
-    }
-
+//
+//    protected void setCountParameters(PreparedStatement ps) throws SQLException
+//    {
+//        super.setCountParameters(ps);
+//        ps.setInt(5, (int)(SearchUtils.ED_THRESHOLD * keywords.length())); // fuzzy b threshold
+//    }
+//
     protected void setFetchParameters(PreparedStatement ps) throws SQLException
     {
         SearchUtils.setFetchParameters(ps, keywords, queryTerms, SearchUtils.ED_THRESHOLD, maxFtsRelevance);

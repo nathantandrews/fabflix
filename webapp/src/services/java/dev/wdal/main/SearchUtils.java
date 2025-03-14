@@ -18,8 +18,8 @@ public class SearchUtils
                 "CASE " +
                     "WHEN (title=?) THEN 1.0 " +
                     "WHEN MATCH (title) AGAINST (? IN BOOLEAN MODE) THEN ((MATCH (title) AGAINST (? IN BOOLEAN MODE))/?)*? " +
-                    "WHEN LOWER(title) LIKE LOWER(?) THEN (LOWER(title) LIKE LOWER(?))*? " +
-                    "WHEN edth(LOWER(title), ?, ?) THEN (1.0 - ed(LOWER(title), ?)/?)*? " +
+//                    "WHEN LOWER(title) LIKE LOWER(?) THEN (LOWER(title) LIKE LOWER(?))*? " +
+//                    "WHEN edth(LOWER(title), ?, ?) THEN (1.0 - ed(LOWER(title), ?)/?)*? " +
                     "ELSE 0 " +
                 "END AS relevance " +
         "  FROM movies " +
@@ -45,7 +45,7 @@ public class SearchUtils
     public static final double ED_THRESHOLD = 0.5;
     public static final double FTS_CONTRIB_FACTOR = 0.9;
     public static final double FUZZ_A_CONTRIB_FACTOR = 0.75;
-    public static final double FUZZ_B_CONTRIB_FACTOR = 1.0;
+//    public static final double FUZZ_B_CONTRIB_FACTOR = 1.0;
 
     public static final String MAX_FTS_RELEVANCE_QUERY =
         "WITH movies_scored AS (SELECT (MATCH (title) AGAINST (? IN BOOLEAN MODE)) AS score FROM movies) SELECT MAX(score) AS max_score FROM movies_scored AS m WHERE score > 0 GROUP BY score ORDER BY score DESC LIMIT 1";
@@ -80,14 +80,14 @@ public class SearchUtils
         ps.setString(i++, queryTerms); // fts score
         ps.setDouble(i++, maxFtsRelevance); // scale by max fts score
         ps.setDouble(i++, SearchUtils.FTS_CONTRIB_FACTOR); // scale by fts contribution factor
-        ps.setString(i++, keywords + "%"); // fuzzy a when condition
-        ps.setString(i++, keywords + "%"); // fuzzy a score
-        ps.setDouble(i++, SearchUtils.FUZZ_A_CONTRIB_FACTOR); // scale by fuzzy A contribution factor
-        ps.setString(i++, keywords); // fuzzy b edth arg 2
-        ps.setInt(i++, (int)(threshold * keywords.length())); // fuzzy b threshold
-        ps.setString(i++, keywords); // fuzzy b distance arg2
-        ps.setInt(i++, keywords.length()); // fuzzy b score length scaler
-        ps.setDouble(i++, SearchUtils.FUZZ_B_CONTRIB_FACTOR); // scale by fuzzy B contribution factor
+//        ps.setString(i++, keywords + "%"); // fuzzy a when condition
+//        ps.setString(i++, keywords + "%"); // fuzzy a score
+//        ps.setDouble(i++, SearchUtils.FUZZ_A_CONTRIB_FACTOR); // scale by fuzzy A contribution factor
+//        ps.setString(i++, keywords); // fuzzy b edth arg 2
+//        ps.setInt(i++, (int)(threshold * keywords.length())); // fuzzy b threshold
+//        ps.setString(i++, keywords); // fuzzy b distance arg2
+//        ps.setInt(i++, keywords.length()); // fuzzy b score length scaler
+//        ps.setDouble(i++, SearchUtils.FUZZ_B_CONTRIB_FACTOR); // scale by fuzzy B contribution factor
     }
 
     public static void search(DataSource dataSource, String queryString, JsonWriter jw)
