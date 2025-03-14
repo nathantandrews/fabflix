@@ -21,7 +21,7 @@ spec:
                 name: fabflix-login-service    # Name of the Service receiving traffic
                 port:
                   number: 8080                # Service port to forward traffic to
-          - path: /fabflix/index.html
+          - path: /fabflix/
             pathType: ImplementationSpecific   # Implementation-specific path matching for regex
             backend:
               service:
@@ -42,7 +42,7 @@ spec:
                 name: fabflix-login-service    # Name of the Service receiving traffic
                 port:
                   number: 8080                # Service port to forward traffic to
-          - path: /fabflix/_dashboard/index.html
+          - path: /fabflix/_dashboard/
             pathType: ImplementationSpecific   # Implementation-specific path matching for regex
             backend:
               service:
