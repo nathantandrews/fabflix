@@ -21,6 +21,41 @@ spec:
                 name: fabflix-movies-service     # Name of the Service receiving traffic
                 port:
                   number: 8080                # Service port to forward traffic to
+          - path: /fabflix/pages
+            pathType: Prefix                  # All other requests matching '/' go here
+            backend:
+              service:
+                name: fabflix-movies-service     # Name of the Service receiving traffic
+                port:
+                  number: 8080                # Service port to forward traffic to
+          - path: /fabflix/js
+            pathType: Prefix    # All other requests matching '/' go here
+            backend:
+              service:
+                name: fabflix-movies-service     # Name of the Service receiving traffic
+                port:
+                  number: 8080                # Service port to forward traffic to
+          - path: /fabflix/css
+            pathType: Prefix    # All other requests matching '/' go here
+            backend:
+              service:
+                name: fabflix-movies-service     # Name of the Service receiving traffic
+                port:
+                  number: 8080                # Service port to forward traffic to
+          - path: /fabflix/images
+            pathType: Prefix    # All other requests matching '/' go here
+            backend:
+              service:
+                name: fabflix-movies-service     # Name of the Service receiving traffic
+                port:
+                  number: 8080                # Service port to forward traffic to
+          - path: /fabflix/api
+            pathType: Prefix    # All other requests matching '/' go here
+            backend:
+              service:
+                name: fabflix-movies-service     # Name of the Service receiving traffic
+                port:
+                  number: 8080                # Service port to forward traffic to
           - path: /fabflix/api/login
             pathType: Prefix                  # Requests beginning with '/api/login' go here
             backend:
