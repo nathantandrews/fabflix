@@ -6,6 +6,7 @@ RUN mvn -pl webapp clean package -P ${MVN_PROFILE}
 FROM tomcat:10-jdk11
 WORKDIR /app
 COPY --from=builder /app/webapp/target/fabflix.war /usr/local/tomcat/webapps/fabflix.war
+# keeping this out of the war file gets rid of db connection thread shutdown error
 COPY mysql-connector-j-8.0.32.jar /usr/local/tomcat/lib
 EXPOSE 8080
 CMD ["catalina.sh", "run"]
