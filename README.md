@@ -1,26 +1,3 @@
 ## CS 122B Project 5
-- # General
-    - #### Team:
-        - #### wedontattendlecture
-    - #### Names:
-        - #### Nathan
-    - #### Project 5 Video Demo Link:
+-## Video Demo Link:
       https://youtu.be/SaBvsnz1aSE
-    - #### Endpoints:
-      - #### for fabflix-login:
-        - #### /api/login
-        - #### /_dashboard/api/login
-      - #### for fabflix-movies:
-        - #### /api/logout
-        - #### /_dashboard/api/add-movie
-        - #### /_dashboard/api/add-star
-        - #### /_dashboard/api/metadata
-        - #### /api/adv-search
-        - #### /api/browse
-        - #### /api/cart
-        - #### /api/genres
-        - #### /api/keyword-search
-        - #### /api/movie-suggestion
-        - #### /api/payment
-        - #### /api/single-movie
-        - #### /api/single-star
